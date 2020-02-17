@@ -45,6 +45,28 @@ namespace BlogWebApi.Controllers.v1
             return Ok(post);
         }
 
+        [HttpPut(ApiRoutes.PostRoute.UpdatePost)]
+        public IActionResult UpdatePost(string id,[FromBody]Post newPost)
+        {
+            Post post = _postmanager.GetPost(id);
+            if (post != null)
+            {
+                _postmanager.UpdatePost(id,newPost);
+            }
+
+            return Ok(newPost);
+        }
+    
+        [HttpDelete(ApiRoutes.PostRoute.DeletePost)]
+        public IActionResult DeleteStudent(string id)
+        {
+            Post post = _postmanager.GetPost(id);
+            if (post != null)
+            {
+                _postmanager.DeletePost(id);
+            }
+            return Ok(post);
+        }
 
 
     }

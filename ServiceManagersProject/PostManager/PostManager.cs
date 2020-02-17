@@ -20,7 +20,8 @@ namespace ServiceManagersProject
 
         public void DeletePost(string id)
         {
-            throw new System.NotImplementedException();
+            var filter = Builders<Post>.Filter.Eq("Id", id);
+            var record = _collection.FindOneAndDelete(filter);
         }
 
         public Post GetPost(string id)
@@ -42,7 +43,8 @@ namespace ServiceManagersProject
 
         public void UpdatePost(string id, Post post)
         {
-            throw new System.NotImplementedException();
+            var filter = Builders<Post>.Filter.Eq("Id", id);
+            var updated = _collection.ReplaceOne(filter, post);
         }
     }
 }
