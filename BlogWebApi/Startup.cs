@@ -15,7 +15,7 @@ using ModelsProject.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
+using Microsoft.OpenApi.Models;
 namespace BlogWebApi
 {
     public class Startup
@@ -61,6 +61,10 @@ namespace BlogWebApi
                 };
             });
 
+            services.AddSwaggerGen(e => 
+            {
+                e.SwaggerDoc("v1", new OpenApiInfo {Title="BlogWebApi", Version="v1"} );
+            });
 
             services.AddControllers();
         }
@@ -74,6 +78,14 @@ namespace BlogWebApi
             }
 
             app.UseHttpsRedirection();
+
+
+            var swaggerOptions = new SwaggerOptions();
+            Configuration.GetSection("SwaggerOptions").Bind(swaggerOptions);
+            app.UseSwagger(op => op.RouteTemplate = swaggerOptions.JsonRoute);
+            app.UseSwaggerUI(op => {op.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description);});
+
+
 
             app.UseRouting();
 

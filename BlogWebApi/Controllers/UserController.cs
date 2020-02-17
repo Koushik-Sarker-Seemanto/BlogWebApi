@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 
 namespace BlogWebApi.Controllers
 {
@@ -21,7 +22,8 @@ namespace BlogWebApi.Controllers
         [HttpGet]
         public string Get()
         {
-            return "assdasd";
+            var name ="koushik";
+            return name;
         }
     }
 }
