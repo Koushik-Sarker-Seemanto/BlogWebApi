@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlogWebApi.Routes.v1;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 
-namespace BlogWebApi.Controllers
+namespace BlogWebApi.Controllers.v1
 {
     [ApiController]
-    [Route("[controller]")]
+    // [Route("[controller]")]
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
@@ -19,7 +20,7 @@ namespace BlogWebApi.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet(ApiRoutes.UserRoute.GetAllusers)]
         public string Get()
         {
             var name ="koushik";
