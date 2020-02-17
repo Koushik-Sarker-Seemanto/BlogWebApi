@@ -6,10 +6,10 @@ namespace ServiceManagersProject
 {
     public interface IPostManager
     {
-        User GetPost(string id);
-        List<User> GetPostList();
-        void InsertPost(User user);
-        void UpdatePost(string id, UserManager user);
+        Post GetPost(string id);
+        List<Post> GetPostList();
+        void InsertPost(Post post);
+        void UpdatePost(string id, Post post);
         void DeletePost(string id);
     }
 }

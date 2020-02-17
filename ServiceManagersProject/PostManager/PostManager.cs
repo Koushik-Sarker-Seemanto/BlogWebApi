@@ -1,12 +1,21 @@
 using System.Collections.Generic;
 using ModelsProject;
+using MongoDB.Driver;
+using ModelsProject.Models;
+using MongoDB.Bson;
 
 namespace ServiceManagersProject
 {
     public class PostManager : IPostManager
     {
-        public PostManager()
+        private IMongoClient _mongoClient;
+        private IMongoDatabase _mongoDatabase;
+        private IMongoCollection<Post> _collection;
+        public PostManager(IDatabaseSettings settings)
         {
+            _mongoClient = new MongoClient(settings.ConnectionString);
+            _mongoDatabase = _mongoClient.GetDatabase(settings.DatabaseName);
+            _collection = _mongoDatabase.GetCollection<Post>("Posts");
         }
 
         public void DeletePost(string id)
@@ -14,22 +23,24 @@ namespace ServiceManagersProject
             throw new System.NotImplementedException();
         }
 
-        public User GetPost(string id)
+        public Post GetPost(string id)
         {
-            throw new System.NotImplementedException();
+            var filter = Builders<Post>.Filter.Eq("Id", id);
+            return  _collection.Find(filter).FirstOrDefault();
         }
 
-        public List<User> GetPostList()
+        public List<Post> GetPostList()
         {
-            throw new System.NotImplementedException();
+            var allPosts = _collection.Find(new BsonDocument());
+            return allPosts.ToList();
         }
 
-        public void InsertPost(User user)
+        public void InsertPost(Post post)
         {
-            throw new System.NotImplementedException();
+            _collection.InsertOne(post);
         }
 
-        public void UpdatePost(string id, UserManager user)
+        public void UpdatePost(string id, Post post)
         {
             throw new System.NotImplementedException();
         }

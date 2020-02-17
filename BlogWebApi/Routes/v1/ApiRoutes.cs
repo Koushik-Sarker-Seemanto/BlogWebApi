@@ -10,7 +10,9 @@ namespace BlogWebApi.Routes.v1
         }
         public static class PostRoute
         {
-            public const string GetAllPosts = "api/v1/posts";
+            public const string GetPostList = "api/v1/posts";
+            public const string GetPost = "api/v1/post/{id}";
+            public const string InsertPost = "api/v1/posts";
         }
     }
 }
