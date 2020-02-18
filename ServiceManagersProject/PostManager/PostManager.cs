@@ -3,6 +3,8 @@ using ModelsProject;
 using MongoDB.Driver;
 using ModelsProject.Models;
 using MongoDB.Bson;
+using System;
+using System.Threading.Tasks;
 
 namespace ServiceManagersProject
 {
@@ -18,33 +20,46 @@ namespace ServiceManagersProject
             _collection = _mongoDatabase.GetCollection<Post>("Posts");
         }
 
-        public void DeletePost(string id)
+        public async Task<bool> DeletePost(string id)
         {
             var filter = Builders<Post>.Filter.Eq("Id", id);
-            var record = _collection.FindOneAndDelete(filter);
+            var record = await _collection.FindOneAndDeleteAsync(filter);
+            if(record.Equals(null))
+            {
+                return false;
+            }
+            else
+                return true;
         }
 
-        public Post GetPost(string id)
+        public async Task<Post> GetPost(string id)
         {
             var filter = Builders<Post>.Filter.Eq("Id", id);
-            return  _collection.Find(filter).FirstOrDefault();
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
-        public List<Post> GetPostList()
+        public async Task<List<Post>> GetPostList()
         {
-            var allPosts = _collection.Find(new BsonDocument());
+            var allPosts = await _collection.FindAsync(new BsonDocument());
             return allPosts.ToList();
         }
 
-        public void InsertPost(Post post)
+        public async Task<bool> InsertPost(Post post)
         {
-            _collection.InsertOne(post);
+            await _collection.InsertOneAsync(post);
+            return true;
         }
 
-        public void UpdatePost(string id, Post post)
+        public async Task<bool> UpdatePost(string id, Post post)
         {
             var filter = Builders<Post>.Filter.Eq("Id", id);
-            var updated = _collection.ReplaceOne(filter, post);
+            var updated = await _collection.ReplaceOneAsync(filter, post);
+            if(updated.Equals(null))
+            {
+                return false;
+            }
+            else
+                return true;
         }
     }
 }

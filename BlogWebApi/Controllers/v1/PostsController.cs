@@ -24,21 +24,21 @@ namespace BlogWebApi.Controllers.v1
         }
 
         [HttpGet(ApiRoutes.PostRoute.GetPostList)]
-        public IActionResult GetPostList()
+        public async Task<IActionResult> GetPostList()
         {
-            List<Post> tempPost = _postmanager.GetPostList();
+            List<Post> tempPost = await _postmanager.GetPostList();
             return Ok(tempPost);
         }
         
         [HttpGet(ApiRoutes.PostRoute.GetPost)]
-        public IActionResult GetPost(string id)
+        public async Task<IActionResult> GetPost(string id)
         {
-            Post post = _postmanager.GetPost(id);
+            Post post = await _postmanager.GetPost(id);
             return Ok(post);
         }
         
         [HttpPost(ApiRoutes.PostRoute.InsertPost)]
-        public IActionResult InsertPost([FromBody]InsertPostRequest requestPost)
+        public async Task<IActionResult> InsertPost([FromBody]InsertPostRequest requestPost)
         {
             if (requestPost.Title == "" || requestPost.Title == null)
                 return BadRequest();
@@ -49,7 +49,7 @@ namespace BlogWebApi.Controllers.v1
                 Body = requestPost.Body
             };
 
-            _postmanager.InsertPost(post);
+            await _postmanager.InsertPost(post);
 
             var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
             var locationUrl = baseUrl + "/" + ApiRoutes.PostRoute.GetPost.Replace("{id}",post.Id);
@@ -66,9 +66,9 @@ namespace BlogWebApi.Controllers.v1
         }
 
         [HttpPut(ApiRoutes.PostRoute.UpdatePost)]
-        public IActionResult UpdatePost(string id,[FromBody]UpdatePostRequest newPost)
+        public async Task<IActionResult> UpdatePost(string id,[FromBody]UpdatePostRequest newPost)
         {
-            Post post = _postmanager.GetPost(id);
+            Post post = await _postmanager.GetPost(id);
             if (post == null)
             {
                 return NotFound();
@@ -77,18 +77,22 @@ namespace BlogWebApi.Controllers.v1
             post.Body = newPost.Body;
             post.updatedAt = newPost.updatedAt;
 
-            _postmanager.UpdatePost(id, post);
+            var check = await _postmanager.UpdatePost(id, post);
+            if(check)
+                return Ok(newPost);
 
-            return Ok(newPost);
+            return BadRequest();
         }
     
         [HttpDelete(ApiRoutes.PostRoute.DeletePost)]
-        public IActionResult DeleteStudent(string id)
+        public async Task<IActionResult> DeleteStudent(string id)
         {
-            Post post = _postmanager.GetPost(id);
+            Post post = await _postmanager.GetPost(id);
             if (post != null)
             {
-                _postmanager.DeletePost(id);
+                var check = await _postmanager.DeletePost(id);
+                if(!check)
+                    return NotFound();
             }
             return Ok(post);
         }

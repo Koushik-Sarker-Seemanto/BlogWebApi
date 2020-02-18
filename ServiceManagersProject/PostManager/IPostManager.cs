@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using ModelsProject;
+using System.Threading.Tasks;
 
 namespace ServiceManagersProject
 {
     public interface IPostManager
     {
-        Post GetPost(string id);
-        List<Post> GetPostList();
-        void InsertPost(Post post);
-        void UpdatePost(string id, Post post);
-        void DeletePost(string id);
+        Task<Post> GetPost(string id);
+        Task<List<Post>> GetPostList();
+        Task<bool> InsertPost(Post post);
+        Task<bool> UpdatePost(string id, Post post);
+        Task<bool> DeletePost(string id);
     }
 }
