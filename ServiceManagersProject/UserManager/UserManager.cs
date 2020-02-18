@@ -17,7 +17,7 @@ namespace ServiceManagersProject
             throw new NotImplementedException();
         }
 
-        public User GetUser(string id)
+        public User GetUserByEmail(string email)
         {
             throw new NotImplementedException();
         }
@@ -27,12 +27,12 @@ namespace ServiceManagersProject
             throw new NotImplementedException();
         }
 
-        public void InsertUser(User user)
+        public bool InsertUser(User user)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateUser(string id, UserManager user)
+        public void UpdateUser(string id, User user)
         {
             throw new NotImplementedException();
         }

@@ -6,10 +6,10 @@ namespace ServiceManagersProject
 {
     public interface IUserManager
     {
-        User GetUser(string id);
+        User GetUserByEmail(string email);
         List<User> GetUserList();
-        void InsertUser(User user);
-        void UpdateUser(string id, UserManager user);
+        bool InsertUser(User user);
+        void UpdateUser(string id, User user);
         void DeleteUser(string id);
     }
 }
