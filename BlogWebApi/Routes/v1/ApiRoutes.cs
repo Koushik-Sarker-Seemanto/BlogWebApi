@@ -6,7 +6,10 @@ namespace BlogWebApi.Routes.v1
     {
         public static class UserRoute
         {
-            public const string GetAllusers = "api/v1/users/";
+            public const string GetUser = "api/v1/users/";
+            public const string Login = "api/v1/user/login";
+            public const string Registration = "api/v1/user/registration";
+            public const string Profile = "api/v1/user/profile";
         }
         public static class PostRoute
         {

@@ -10,9 +10,12 @@ using ServiceManagersProject;
 using ModelsProject;
 using BlogWebApi.Contracts.v1.Requests;
 using BlogWebApi.Contracts.v1.Responses;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace BlogWebApi.Controllers.v1
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     // [Route("[controller]")]
     public class PostsController : ControllerBase

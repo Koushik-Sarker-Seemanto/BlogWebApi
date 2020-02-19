@@ -26,14 +26,9 @@ namespace BlogWebApi.Controllers.v1
             _userManager = userManager;
         }
 
-        [HttpGet(ApiRoutes.UserRoute.GetAllusers)]
-        public string Get()
-        {
-            var name ="koushik";
-            return name;
-        }
+
         [AllowAnonymous]
-        [HttpPost("login")]
+        [HttpPost(ApiRoutes.UserRoute.Login)]
         public ActionResult<string> Login([FromBody] LoginUserRequest formData)
         {
             var user = _userManager.GetUserByEmail(formData.Email);
@@ -45,12 +40,14 @@ namespace BlogWebApi.Controllers.v1
             {
                 return BadRequest("incorrect password");
             }
-            return "token";
-            //return user.GetToken();
+            return user.GetToken();
         }
+
+
+
         [AllowAnonymous]
-        [HttpPost("register", Name="CreateUser")]
-        public ActionResult<string> Create([FromBody]RegisterUserRequest formData)
+        [HttpPost(ApiRoutes.UserRoute.Registration)]
+        public ActionResult<string> Registration([FromBody]RegisterUserRequest formData)
         {
             var existingUser = _userManager.GetUserByEmail(formData.Email);
             if(existingUser != null)
@@ -64,11 +61,22 @@ namespace BlogWebApi.Controllers.v1
             var added = _userManager.InsertUser(newUser);
             if(added)
             {
-                //return newUser.GetToken();
-                return "token";
+                return newUser.GetToken();
             }
-            //return newUser.GetToken();
-            return "token";
+            return newUser.GetToken();
         }
+
+
+        [HttpGet(ApiRoutes.UserRoute.Profile)]
+        public ActionResult<UserProfile> Profile()
+        {
+            var user =  _userManager.GetUser(HttpContext.User.Identity.Name);
+            if(user == null)
+            {
+                return NotFound("user not found");
+            }
+            return new UserProfile(user);
+        }
+
     }
 }

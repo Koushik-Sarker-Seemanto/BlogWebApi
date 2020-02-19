@@ -2,15 +2,23 @@ using System;
 using System.Collections.Generic;
 using ModelsProject;
 using ModelsProject.Models;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace ServiceManagersProject
 {
     public class UserManager : IUserManager
     {
-        public UserManager()
+        private IMongoClient _mongoClient;
+        private IMongoDatabase _mongoDatabase;
+        private IMongoCollection<User> _collection;
+        public UserManager(IDatabaseSettings settings)
         {
-            
+            _mongoClient = new MongoClient(settings.ConnectionString);
+            _mongoDatabase = _mongoClient.GetDatabase(settings.DatabaseName);
+            _collection = _mongoDatabase.GetCollection<User>("Users");
         }
+        
 
         public void DeleteUser(string id)
         {
@@ -19,7 +27,14 @@ namespace ServiceManagersProject
 
         public User GetUserByEmail(string email)
         {
-            throw new NotImplementedException();
+            var filter = Builders<User>.Filter.Eq("Email", email);
+            return _collection.Find(filter).FirstOrDefault();
+        }
+
+        public User GetUser(string id)
+        {
+            var filter = Builders<User>.Filter.Eq("Id", id);
+            return _collection.Find(filter).FirstOrDefault();
         }
 
         public List<User> GetUserList()
@@ -29,7 +44,8 @@ namespace ServiceManagersProject
 
         public bool InsertUser(User user)
         {
-            throw new NotImplementedException();
+            _collection.InsertOne(user);
+            return true;
         }
 
         public void UpdateUser(string id, User user)

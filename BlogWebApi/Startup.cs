@@ -32,6 +32,7 @@ namespace BlogWebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IPostManager,PostManager>();
+            services.AddSingleton<IUserManager,UserManager>();
 
             services.Configure<DatabaseSettings>(
                 Configuration.GetSection(nameof(DatabaseSettings)));
@@ -82,6 +83,8 @@ namespace BlogWebApi
                    }
                 });
             });
+
+            AppSettingsProvider.jwtSettings = jwtSettings;
 
             services.AddControllers();
         }
