@@ -17,7 +17,6 @@ namespace BlogWebApi.Controllers.v1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
-    // [Route("[controller]")]
     public class PostsController : ControllerBase
     {
         private readonly IPostManager _postmanager;

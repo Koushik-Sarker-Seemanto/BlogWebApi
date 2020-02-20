@@ -4,6 +4,7 @@ using ModelsProject;
 using ModelsProject.Models;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using System.Threading.Tasks;
 
 namespace ServiceManagersProject
 {
@@ -20,37 +21,52 @@ namespace ServiceManagersProject
         }
         
 
-        public void DeleteUser(string id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public User GetUserByEmail(string email)
-        {
-            var filter = Builders<User>.Filter.Eq("Email", email);
-            return _collection.Find(filter).FirstOrDefault();
-        }
-
-        public User GetUser(string id)
+        public async Task<bool> DeleteUser(string id)
         {
             var filter = Builders<User>.Filter.Eq("Id", id);
-            return _collection.Find(filter).FirstOrDefault();
+            var record = await _collection.FindOneAndDeleteAsync(filter);
+            if(record.Equals(null))
+            {
+                return false;
+            }
+            else
+                return true;
         }
 
-        public List<User> GetUserList()
+        public async Task<User> GetUserByEmail(string email)
         {
-            throw new NotImplementedException();
+            var filter = Builders<User>.Filter.Eq("Email", email);
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
-        public bool InsertUser(User user)
+        public async Task<User> GetUser(string id)
         {
-            _collection.InsertOne(user);
+            var filter = Builders<User>.Filter.Eq("Id", id);
+            return await _collection.Find(filter).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<User>> GetUserList()
+        {
+            var allusers = await _collection.FindAsync(new BsonDocument());
+            return allusers.ToList();
+        }
+
+        public async Task<bool> InsertUser(User user)
+        {
+             await _collection.InsertOneAsync(user);
             return true;
         }
 
-        public void UpdateUser(string id, User user)
+        public async Task<bool> UpdateUser(string id, User user)
         {
-            throw new NotImplementedException();
+            var filter = Builders<User>.Filter.Eq("Id", id);
+            var updated = await _collection.ReplaceOneAsync(filter, user);
+            if(updated.Equals(null))
+            {
+                return false;
+            }
+            else
+                return true;
         }
     }
 }

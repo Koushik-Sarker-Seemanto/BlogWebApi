@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
 using ModelsProject;
+using System.Threading.Tasks;
 
 namespace ServiceManagersProject
 {
     public interface IUserManager
     {
-        User GetUserByEmail(string email);
-        User GetUser(string id);
-        List<User> GetUserList();
-        bool InsertUser(User user);
-        void UpdateUser(string id, User user);
-        void DeleteUser(string id);
+        Task<User> GetUserByEmail(string email);
+        Task<User> GetUser(string id);
+        Task<List<User>> GetUserList();
+        Task<bool> InsertUser(User user);
+        Task<bool> UpdateUser(string id, User user);
+        Task<bool> DeleteUser(string id);
     }
 }

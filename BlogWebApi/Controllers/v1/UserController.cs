@@ -29,9 +29,9 @@ namespace BlogWebApi.Controllers.v1
 
         [AllowAnonymous]
         [HttpPost(ApiRoutes.UserRoute.Login)]
-        public ActionResult<string> Login([FromBody] LoginUserRequest formData)
+        public async Task<ActionResult<string>> Login([FromBody] LoginUserRequest formData)
         {
-            var user = _userManager.GetUserByEmail(formData.Email);
+            var user = await _userManager.GetUserByEmail(formData.Email);
             if(user == null)
             {
                 return BadRequest("no user found with this email");
@@ -47,18 +47,22 @@ namespace BlogWebApi.Controllers.v1
 
         [AllowAnonymous]
         [HttpPost(ApiRoutes.UserRoute.Registration)]
-        public ActionResult<string> Registration([FromBody]RegisterUserRequest formData)
+        public async Task<ActionResult<string>> Registration([FromBody]RegisterUserRequest formData)
         {
-            var existingUser = _userManager.GetUserByEmail(formData.Email);
+            var existingUser = await _userManager.GetUserByEmail(formData.Email);
             if(existingUser != null)
             {
                 return BadRequest("user with this email already registered");
+            }
+            if(!formData.IsValid())
+            {
+                return BadRequest("Name, Email & Password shouldn't be empty.");
             }
             var newUser = new User();
             newUser.Email = formData.Email;
             newUser.Name = formData.Name;
             newUser.SetPassword(formData.Password);
-            var added = _userManager.InsertUser(newUser);
+            var added = await _userManager.InsertUser(newUser);
             if(added)
             {
                 return newUser.GetToken();
@@ -68,9 +72,9 @@ namespace BlogWebApi.Controllers.v1
 
 
         [HttpGet(ApiRoutes.UserRoute.Profile)]
-        public ActionResult<UserProfile> Profile()
+        public async Task<ActionResult<UserProfile>> Profile()
         {
-            var user =  _userManager.GetUser(HttpContext.User.Identity.Name);
+            var user = await _userManager.GetUser(HttpContext.User.Identity.Name);
             if(user == null)
             {
                 return NotFound("user not found");
