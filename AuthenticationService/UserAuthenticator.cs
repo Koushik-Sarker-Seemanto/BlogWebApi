@@ -31,13 +31,17 @@ namespace AuthenticationService
         public async Task<string> LoginUser(LoginRequest request)
         {
             var user = await _userManager.GetUserByEmail(request.Email);
+            if (!request.IsValid())
+            {
+                return StatusCode.InvalidArgument.ToString();
+            }
             if(user == null)
             {
                 return StatusCode.NotFound.ToString();
             }
             if(user.CheckPassword(request.Password) == false)
             {
-                return StatusCode.InvalidArgument.ToString();
+                return StatusCode.InvalidArgument.ToString()+" password";
             }
             return user.GetToken();
         }

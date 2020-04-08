@@ -25,12 +25,17 @@ namespace WebService.Controllers
         {
             var response = await _userManager.LoginUser(formData);
 
+            if (response == ContractsService.StatusCode.InvalidArgument.ToString())
+            {
+                return BadRequest("Invalid argument provided");
+            }
+            
             if (response == ContractsService.StatusCode.NotFound.ToString())
             {
                 return BadRequest("Invalid Email");
             }
 
-            if (response == ContractsService.StatusCode.InvalidArgument.ToString())
+            if (response == ContractsService.StatusCode.InvalidArgument.ToString()+" password")
             {
                 return BadRequest("Invalid password");
             }
