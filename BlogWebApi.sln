@@ -1,16 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebService", "WebService\WebService.csproj", "{A4D63E65-BF7B-44D0-8B6E-EF97FBAE4D0A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebService", "src\WebService\WebService.csproj", "{A4D63E65-BF7B-44D0-8B6E-EF97FBAE4D0A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationService", "AuthenticationService\AuthenticationService.csproj", "{3048F5D4-F4EF-4DC1-867F-A9CB00103CEA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationService", "src\AuthenticationService\AuthenticationService.csproj", "{3048F5D4-F4EF-4DC1-867F-A9CB00103CEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelsService", "ModelsService\ModelsService.csproj", "{54937FAB-64F7-4D15-BEA4-3550899AD2BC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelsService", "src\ModelsService\ModelsService.csproj", "{54937FAB-64F7-4D15-BEA4-3550899AD2BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContractsService", "ContractsService\ContractsService.csproj", "{B3AA7378-4827-4CC9-AC9F-9505D1EE4DBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContractsService", "src\ContractsService\ContractsService.csproj", "{B3AA7378-4827-4CC9-AC9F-9505D1EE4DBD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{4DE46DF2-5097-443A-8B86-795D58792F28}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationService.UnitTest", "test\AuthenticationService.UnitTest\AuthenticationService.UnitTest.csproj", "{6378C7A0-00FF-47ED-8AE7-E4113151D00F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A9E83CDA-7DD7-40E7-B784-6346EC5FDD7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,5 +43,9 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6378C7A0-00FF-47ED-8AE7-E4113151D00F} = {4DE46DF2-5097-443A-8B86-795D58792F28}
+		{3048F5D4-F4EF-4DC1-867F-A9CB00103CEA} = {A9E83CDA-7DD7-40E7-B784-6346EC5FDD7C}
+		{B3AA7378-4827-4CC9-AC9F-9505D1EE4DBD} = {A9E83CDA-7DD7-40E7-B784-6346EC5FDD7C}
+		{54937FAB-64F7-4D15-BEA4-3550899AD2BC} = {A9E83CDA-7DD7-40E7-B784-6346EC5FDD7C}
+		{A4D63E65-BF7B-44D0-8B6E-EF97FBAE4D0A} = {A9E83CDA-7DD7-40E7-B784-6346EC5FDD7C}
 	EndGlobalSection
 EndGlobal
