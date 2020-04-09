@@ -17,6 +17,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ModelsService.Configuration;
+using ModelsService.Managers.PostManager;
 using ModelsService.Managers.UserManager;
 using WebService.Configuration;
 
@@ -39,6 +40,7 @@ namespace WebService
             services.AddSingleton<IUserAuthenticator, UserAuthenticator>();
             
             services.AddSingleton<IUserManager,UserManager>();
+            services.AddSingleton<IPostManager, PostManager>();
             
             services.Configure<DatabaseSettings>(
                 Configuration.GetSection(nameof(DatabaseSettings)));
