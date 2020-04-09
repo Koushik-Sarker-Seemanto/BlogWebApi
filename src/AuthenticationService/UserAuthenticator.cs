@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ContractsService;
 using ContractsService.v1.UserContracts.Requests;
 using ContractsService.v1.UserContracts.Responses;
@@ -131,6 +132,62 @@ namespace AuthenticationService
                 Email = user.Email,
             };
             return profileResponse;
+        }
+
+        public async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest request, string context)
+        {
+            var currentUser = await _userManager.GetUser(context);
+            if (currentUser == null)
+            {
+                return new UpdateUserResponse()
+                {
+                    StatusCode = StatusCode.Unauthenticated,
+                    ErrorMessage = "Unauthenticated user",
+                };
+            }
+
+            if (!request.IsValid())
+            {
+                return new UpdateUserResponse()
+                {
+                    StatusCode = StatusCode.InvalidArgument,
+                    ErrorMessage = "Empty argument provided",
+                };
+            }
+
+            var unavailableEmail = await _userManager.GetUserByEmail(request.Email);
+            if (unavailableEmail != null)
+            {
+                return new UpdateUserResponse()
+                {
+                    StatusCode = StatusCode.AlreadyExists,
+                    ErrorMessage = "This Email already exists",
+                };
+            }
+            
+            User user = new User()
+            {
+                Id = currentUser.Id,
+                Name = request.Name,
+                Email = request.Email,
+            };
+            user.SetPassword(request.Password);
+
+            var update = await _userManager.UpdateUser(currentUser.Id, user);
+            if (!update)
+            {
+                return new UpdateUserResponse()
+                {
+                    StatusCode = StatusCode.Internal,
+                    ErrorMessage = "Internal Error! Couldn't update user",
+                };
+            }
+            return new UpdateUserResponse()
+            {
+                Name = user.Name,
+                Email = user.Email,
+                StatusCode = StatusCode.Ok,
+            };
         }
     }
 }

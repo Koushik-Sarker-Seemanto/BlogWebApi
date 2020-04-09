@@ -8,6 +8,7 @@ namespace WebService.Routes.v1
             public const string Login = "api/v1/user/login";
             public const string Registration = "api/v1/user/registration";
             public const string Profile = "api/v1/user/profile";
+            public const string UpdateProfile = "api/v1/user/update";
         }
         public static class PostRoute
         {

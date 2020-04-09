@@ -73,5 +73,36 @@ namespace WebService.Controllers
             }
             return user;
         }
+        
+        [HttpPost(ApiRoutes.UserRoute.UpdateProfile)]
+        public async Task<ActionResult<UpdateUserResponse>> Update([FromBody]UpdateUserRequest formData)
+        {
+            var context = HttpContext.User.Identity.Name;
+            var result = await _userManager.UpdateUser(formData, context);
+            
+            var response = result.StatusCode;
+
+            if (response == ContractsService.StatusCode.Unauthenticated)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+            
+            if (response == ContractsService.StatusCode.AlreadyExists)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+
+            if (response == ContractsService.StatusCode.InvalidArgument)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+
+            if (response == ContractsService.StatusCode.Internal)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+            return result;
+        }
+
     }
 }
