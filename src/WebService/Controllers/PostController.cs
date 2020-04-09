@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using ModelsService.Managers.PostManager;
 using ModelsService.Managers.UserManager;
 using ModelsService.Models;
+using PostHandlerService;
 using WebService.Routes.v1;
 
 namespace WebService.Controllers
@@ -17,55 +18,43 @@ namespace WebService.Controllers
     [Route("[controller]")]
     public class PostController : ControllerBase
     {
-        private IPostManager _postManager;
-        private IUserManager _userManager;
-        public PostController(IPostManager postManager, IUserManager userManager)
+        private IPostHandler _postHandler;
+        public PostController(IPostHandler postHandler)
         {
-            _postManager = postManager;
-            _userManager = userManager;
+            _postHandler = postHandler;
         }
 
         [HttpGet(ApiRoutes.PostRoute.GetPostList)]
-        public async Task<ActionResult<List<Post>>> GetAllPosts()
+        public async Task<ActionResult<GetAllPostResponse>> GetAllPosts()
         {
             var context = HttpContext.User.Identity.Name;
 
-            var user = await _userManager.GetUser(context);
-            if (user == null)
+            var result = await _postHandler.GetAllPosts(context);
+            if (result.StatusCode == ContractsService.StatusCode.Unauthenticated)
             {
-                return BadRequest("Unauthorised user");
+                return BadRequest(result.ErrorMessage);
             }
-            var allPosts = await _postManager.GetAllPost();
-            return allPosts;
+            return result;
         }
 
         [HttpPost(ApiRoutes.PostRoute.InsertPost)]
-        public async Task<ActionResult<Post>> InsertPost([FromBody]InsertPostRequest formData )
+        public async Task<ActionResult<InsertPostResponse>> InsertPost([FromBody]InsertPostRequest formData )
         {
             var context = HttpContext.User.Identity.Name;
 
-            var user = await _userManager.GetUser(context);
-            if (user == null)
-            {
-                return BadRequest("Unauthorised user");
-            }
-            
-            Post post = new Post()
-            {
-                Title = formData.Title,
-                Body = formData.Body,
-                Author = user,
-                Likes = null,
-                UpdatedAt = null,
-            };
+            var result = await _postHandler.InsertPost(formData, context);
 
-            var result = await _postManager.InsertPost(post);
-            if (result == false)
+            switch (result.StatusCode)
             {
-                return BadRequest("Couldn't insert post");
+                case ContractsService.StatusCode.Unauthenticated:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Internal:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.InvalidArgument:
+                    return BadRequest(result.ErrorMessage);
+                default:
+                    return result;
             }
-
-            return post;
         }
     }
 }

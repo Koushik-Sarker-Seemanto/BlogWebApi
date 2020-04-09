@@ -19,6 +19,7 @@ using Microsoft.OpenApi.Models;
 using ModelsService.Configuration;
 using ModelsService.Managers.PostManager;
 using ModelsService.Managers.UserManager;
+using PostHandlerService;
 using WebService.Configuration;
 
 namespace WebService
@@ -38,6 +39,7 @@ namespace WebService
             services.AddControllers();
 
             services.AddSingleton<IUserAuthenticator, UserAuthenticator>();
+            services.AddSingleton<IPostHandler, PostHandler>();
             
             services.AddSingleton<IUserManager,UserManager>();
             services.AddSingleton<IPostManager, PostManager>();

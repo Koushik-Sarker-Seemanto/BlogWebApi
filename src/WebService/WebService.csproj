@@ -12,6 +12,7 @@
     <ItemGroup>
       <ProjectReference Include="..\AuthenticationService\AuthenticationService.csproj" />
       <ProjectReference Include="..\ContractsService\ContractsService.csproj" />
+      <ProjectReference Include="..\PostHandlerService\PostHandlerService.csproj" />
     </ItemGroup>
 
 
