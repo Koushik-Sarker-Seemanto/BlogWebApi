@@ -20,23 +20,33 @@ namespace PostHandlerService
             _userManager = userManager;
         }
 
-        public async Task<GetAllPostResponse> GetAllPosts(string context)
+        public async Task<GetAllPostResponse> GetAllPosts()
         {
-            var user = await _userManager.GetUser(context);
-            if (user == null)
-            {
-                return new GetAllPostResponse()
-                {
-                    StatusCode = StatusCode.Unauthenticated,
-                    ErrorMessage = "Unauthenticated user",
-                };
-            }
             var allPosts = await _postManager.GetAllPost();
             
             return new GetAllPostResponse()
             {
                 StatusCode = StatusCode.Ok,
                 PostList = allPosts,
+            };
+        }
+
+        public async Task<PostResponse> GetPostById(string id)
+        {
+            var post = await _postManager.GetPostById(id);
+            if (post == null)
+            {
+                return  new PostResponse()
+                {
+                    StatusCode = StatusCode.NotFound,
+                    ErrorMessage = "Post not found",
+                };
+            }
+            return new PostResponse()
+            {
+                StatusCode = StatusCode.Ok,
+                Id = post.Id, Title = post.Title, Body = post.Body, Author = post.Author,
+                Likes = post.Likes, CreatedAt = post.CreatedAt, UpdatedAt = post.UpdatedAt,
             };
         }
 

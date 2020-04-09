@@ -7,7 +7,8 @@ namespace PostHandlerService
 {
     public interface IPostHandler
     {
-        Task<GetAllPostResponse> GetAllPosts(string context);
+        Task<GetAllPostResponse> GetAllPosts();
+        Task<PostResponse> GetPostById(string id);
         Task<InsertPostResponse> InsertPost(InsertPostRequest request, string context);
     }
 }

@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using AuthenticationService;
 using ContractsService.v1.UserContracts.Requests;
 using ContractsService.v1.UserContracts.Responses;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebService.Routes.v1;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace WebService.Controllers
 {
+    [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("[controller]")]
     public class UserController : ControllerBase

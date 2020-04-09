@@ -1,19 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ContractsService.v1.PostContracts.Requests;
 using ContractsService.v1.PostContracts.Response;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using ModelsService.Managers.PostManager;
-using ModelsService.Managers.UserManager;
-using ModelsService.Models;
 using PostHandlerService;
 using WebService.Routes.v1;
 
 namespace WebService.Controllers
 {
+    [Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("[controller]")]
     public class PostController : ControllerBase
@@ -27,10 +23,15 @@ namespace WebService.Controllers
         [HttpGet(ApiRoutes.PostRoute.GetPostList)]
         public async Task<ActionResult<GetAllPostResponse>> GetAllPosts()
         {
-            var context = HttpContext.User.Identity.Name;
+            var result = await _postHandler.GetAllPosts();
+            return result;
+        }
 
-            var result = await _postHandler.GetAllPosts(context);
-            if (result.StatusCode == ContractsService.StatusCode.Unauthenticated)
+        [HttpGet(ApiRoutes.PostRoute.GetPost)]
+        public async Task<ActionResult<PostResponse>> GetPostById(string id)
+        {
+            var result = await _postHandler.GetPostById(id);
+            if (result.StatusCode == ContractsService.StatusCode.NotFound)
             {
                 return BadRequest(result.ErrorMessage);
             }
