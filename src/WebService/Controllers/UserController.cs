@@ -23,46 +23,43 @@ namespace WebService.Controllers
         [HttpPost(ApiRoutes.UserRoute.Login)]
         public async Task<ActionResult<string>> Login([FromBody] LoginRequest formData)
         {
-            var response = await _userManager.LoginUser(formData);
+            var result = await _userManager.LoginUser(formData);
+            var response = result.StatusCode;
 
-            if (response == ContractsService.StatusCode.InvalidArgument.ToString())
+            if (response == ContractsService.StatusCode.InvalidArgument)
             {
-                return BadRequest("Invalid argument provided");
+                return BadRequest(result.ErrorMessage);
             }
             
-            if (response == ContractsService.StatusCode.NotFound.ToString())
+            if (response == ContractsService.StatusCode.NotFound)
             {
-                return BadRequest("Invalid Email");
+                return BadRequest(result.ErrorMessage);
             }
-
-            if (response == ContractsService.StatusCode.InvalidArgument.ToString()+" password")
-            {
-                return BadRequest("Invalid password");
-            }
-            return response;
+            return result.Token;
         }
 
         [AllowAnonymous]
         [HttpPost(ApiRoutes.UserRoute.Registration)]
         public async Task<ActionResult<string>> Registration([FromBody]RegisterRequest formData)
         {
-            var response = await _userManager.RegisterUser(formData);
+            var result = await _userManager.RegisterUser(formData);
+            var response = result.StatusCode;
             
-            if (response == ContractsService.StatusCode.AlreadyExists.ToString())
+            if (response == ContractsService.StatusCode.AlreadyExists)
             {
-                return BadRequest("Email already exists");
+                return BadRequest(result.ErrorMessage);
             }
 
-            if (response == ContractsService.StatusCode.InvalidArgument.ToString())
+            if (response == ContractsService.StatusCode.InvalidArgument)
             {
-                return BadRequest("Invalid argument provided");
+                return BadRequest(result.ErrorMessage);
             }
 
-            if (response == ContractsService.StatusCode.Internal.ToString())
+            if (response == ContractsService.StatusCode.Internal)
             {
-                return BadRequest("Internal error occured. Couldn't insert user.");
+                return BadRequest(result.ErrorMessage);
             }
-            return response;
+            return result.Token;
         }
 
         [HttpGet(ApiRoutes.UserRoute.Profile)]

@@ -28,8 +28,8 @@ namespace AuthenticationService.UnitTest
             };
             var result = await _authenticator.LoginUser(request);
             
-            Assert.NotEqual(result, StatusCode.NotFound.ToString());
-            Assert.NotEqual(result, StatusCode.InvalidArgument.ToString());
+            Assert.Equal(StatusCode.Ok, result.StatusCode);
+            Assert.NotNull(result.Token);
         }
         
         [Fact]
@@ -42,7 +42,7 @@ namespace AuthenticationService.UnitTest
             };
             var result = await _authenticator.LoginUser(request);
             
-            Assert.Equal(result, StatusCode.NotFound.ToString());
+            Assert.Equal(StatusCode.NotFound, result.StatusCode);
         }
         
         [Fact]
@@ -51,7 +51,8 @@ namespace AuthenticationService.UnitTest
             LoginRequest request = new LoginRequest();
             var result = await _authenticator.LoginUser(request);
             
-            Assert.Equal(result, StatusCode.InvalidArgument.ToString());
+            Assert.Equal(StatusCode.InvalidArgument, result.StatusCode);
+            Assert.Equal("Empty argument provided", result.ErrorMessage);
         }
         
         [Fact]
@@ -64,7 +65,8 @@ namespace AuthenticationService.UnitTest
             };
             var result = await _authenticator.LoginUser(request);
             
-            Assert.Equal(result, StatusCode.InvalidArgument+" password");
+            Assert.Equal(StatusCode.InvalidArgument, result.StatusCode);
+            Assert.Equal("Wrong password", result.ErrorMessage);
         }
 
         [Fact]
@@ -78,11 +80,10 @@ namespace AuthenticationService.UnitTest
             };
             var result = await _authenticator.RegisterUser(request);
             
-            Assert.NotEqual(result, StatusCode.Internal.ToString());
-            Assert.NotEqual(result, StatusCode.InvalidArgument.ToString());
-            Assert.NotEqual(result, StatusCode.AlreadyExists.ToString());
+            Assert.Equal(StatusCode.Ok, result.StatusCode);
+            Assert.NotNull(result.Token);
         }
-        
+
         [Fact]
         public async Task RegisterUserTestUserAlreadyExist()
         {
@@ -94,9 +95,10 @@ namespace AuthenticationService.UnitTest
             };
             var result = await _authenticator.RegisterUser(request);
             
-            Assert.Equal(result, StatusCode.AlreadyExists.ToString());
+            Assert.Equal(StatusCode.AlreadyExists, result.StatusCode);
+            Assert.Equal("Email already exist", result.ErrorMessage);
         }
-        
+
         [Fact]
         public async Task RegisterUserTestInvalidArgument()
         {
@@ -107,7 +109,8 @@ namespace AuthenticationService.UnitTest
             };
             var result = await _authenticator.RegisterUser(request);
             
-            Assert.Equal(result, StatusCode.InvalidArgument.ToString());
+            Assert.Equal(StatusCode.InvalidArgument, result.StatusCode);
+            Assert.Equal("Empty argument provided", result.ErrorMessage);
         }
         
         [Fact]
@@ -121,9 +124,10 @@ namespace AuthenticationService.UnitTest
             };
             var result = await _authenticator.RegisterUser(request);
             
-            Assert.Equal(result, StatusCode.Internal.ToString());
+            Assert.Equal(StatusCode.Internal, result.StatusCode);
+            Assert.Equal("Internal error! Couldn't insert user", result.ErrorMessage);
         }
-        
+
         [Fact]
         public async Task ReturnProfileTestMustReturn()
         {

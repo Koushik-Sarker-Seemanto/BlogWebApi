@@ -28,22 +28,39 @@ namespace AuthenticationService
         /// </summary>
         /// <param name="request"></param>
         /// <returns>login response string.</returns>
-        public async Task<string> LoginUser(LoginRequest request)
+        public async Task<LoginResponse> LoginUser(LoginRequest request)
         {
             var user = await _userManager.GetUserByEmail(request.Email);
             if (!request.IsValid())
             {
-                return StatusCode.InvalidArgument.ToString();
+                return new LoginResponse()
+                {
+                    StatusCode = StatusCode.InvalidArgument,
+                    ErrorMessage = "Empty argument provided",
+                };
             }
             if(user == null)
             {
-                return StatusCode.NotFound.ToString();
+                return new LoginResponse()
+                {
+                    StatusCode = StatusCode.NotFound,
+                    ErrorMessage = "User not found",
+                };
             }
             if(user.CheckPassword(request.Password) == false)
             {
-                return StatusCode.InvalidArgument.ToString()+" password";
+                return new LoginResponse()
+                {
+                    StatusCode = StatusCode.InvalidArgument,
+                    ErrorMessage = "Wrong password",
+                };
             }
-            return user.GetToken();
+
+            return new LoginResponse()
+            {
+                Token = user.GetToken(),
+                StatusCode = StatusCode.Ok
+            };
         }
 
         /// <summary>
@@ -51,16 +68,25 @@ namespace AuthenticationService
         /// </summary>
         /// <param name="request"></param>
         /// <returns>register response string.</returns>
-        public async Task<string> RegisterUser(RegisterRequest request)
+        public async Task<RegisterResponse> RegisterUser(RegisterRequest request)
         {
             var existingUser = await _userManager.GetUserByEmail(request.Email);
+
             if(existingUser != null)
             {
-                return StatusCode.AlreadyExists.ToString();
+                return new RegisterResponse()
+                {
+                    StatusCode = StatusCode.AlreadyExists,
+                    ErrorMessage = "Email already exist",
+                };
             }
             if(!request.IsValid())
             {
-                return StatusCode.InvalidArgument.ToString();
+                return new RegisterResponse()
+                {
+                    StatusCode = StatusCode.InvalidArgument,
+                    ErrorMessage = "Empty argument provided",
+                };
             }
 
             var newUser = new User
@@ -71,10 +97,18 @@ namespace AuthenticationService
             var added = await _userManager.InsertUser(newUser);
             if (!added)
             {
-                return StatusCode.Internal.ToString();
+                return new RegisterResponse()
+                {
+                    StatusCode = StatusCode.Internal,
+                    ErrorMessage = "Internal error! Couldn't insert user"
+                };
             }
 
-            return newUser.GetToken();
+            return new RegisterResponse()
+            {
+                Token = newUser.GetToken(),
+                StatusCode = StatusCode.Ok,
+            };
         }
 
         /// <summary>
