@@ -144,6 +144,91 @@ namespace AuthenticationService.UnitTest
             var result = await _authenticator.ReturnProfile(id);
             Assert.Null(result);
         }
+
+        [Fact]
+        public async Task UpdateUserTestMustUpdate()
+        {
+            string id = "1";
+            UpdateUserRequest request = new UpdateUserRequest()
+            {
+                Name = "string",
+                Email = "test",
+                Password = "qwer",
+            };
+
+            var result = await _authenticator.UpdateUser(request, id);
+            
+            Assert.Equal(StatusCode.Ok,result.StatusCode);
+            Assert.Equal("string", result.Name);
+            Assert.Equal("test", result.Email);
+        }
+        
+        [Fact]
+        public async Task UpdateUserTestUnauthenticatedUser()
+        {
+            string id = "2";
+            UpdateUserRequest request = new UpdateUserRequest()
+            {
+                Name = "string",
+                Email = "test",
+                Password = "qwer",
+            };
+
+            var result = await _authenticator.UpdateUser(request, id);
+            
+            Assert.Equal(StatusCode.Unauthenticated,result.StatusCode);
+            Assert.Equal("Unauthenticated user", result.ErrorMessage);
+        }
+        
+        [Fact]
+        public async Task UpdateUserTestInvalidArgument()
+        {
+            string id = "1";
+            UpdateUserRequest request = new UpdateUserRequest()
+            {
+                Email = "test",
+                Password = "qwer",
+            };
+
+            var result = await _authenticator.UpdateUser(request, id);
+            
+            Assert.Equal(StatusCode.InvalidArgument,result.StatusCode);
+            Assert.Equal("Empty argument provided", result.ErrorMessage);
+        }
+        
+        [Fact]
+        public async Task UpdateUserTestEmailAlreadyExists()
+        {
+            string id = "1";
+            UpdateUserRequest request = new UpdateUserRequest()
+            {
+                Name = "string",
+                Email = "testpass@gmail.com",
+                Password = "qwer",
+            };
+
+            var result = await _authenticator.UpdateUser(request, id);
+            
+            Assert.Equal(StatusCode.AlreadyExists,result.StatusCode);
+            Assert.Equal("This Email already exists", result.ErrorMessage);
+        }
+        
+        [Fact]
+        public async Task UpdateUserTestCanNotUpdateUser()
+        {
+            string id = "0";
+            UpdateUserRequest request = new UpdateUserRequest()
+            {
+                Name = "string",
+                Email = "test",
+                Password = "qwer",
+            };
+
+            var result = await _authenticator.UpdateUser(request, id);
+            
+            Assert.Equal(StatusCode.Internal,result.StatusCode);
+            Assert.Equal("Internal Error! Couldn't update user", result.ErrorMessage);
+        }
         
         private Mock<IUserManager> GetMockUserManager()
         {
@@ -187,7 +272,27 @@ namespace AuthenticationService.UnitTest
                         };
                     }
 
+                    if(target == "0")
+                    {
+                        return new User()
+                        {
+                            Id = "0",
+                            Email = "test",
+                            Name = "test user",
+                        };
+                    }
+
                     return null;
+                });
+            mock.Setup(e => e.UpdateUser(It.IsAny<string>(), It.IsAny<User>()))
+                .ReturnsAsync((string targetId, User target) =>
+                {
+                    if (targetId == "1")
+                    {
+                        return true;
+                    }
+
+                    return false;
                 });
             
             return mock;
