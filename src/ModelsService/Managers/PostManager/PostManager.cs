@@ -9,45 +9,63 @@ namespace ModelsService.Managers.PostManager
 {
     public class PostManager: IPostManager
     {
-        private IMongoClient _mongoClient;
-        private IMongoDatabase _mongoDatabase;
-        private IMongoCollection<Post> _collection;
+        private readonly IMongoCollection<Post> _collection;
         public PostManager(IDatabaseSettings settings)
         {
-            _mongoClient = new MongoClient(settings.ConnectionString);
-            _mongoDatabase = _mongoClient.GetDatabase(settings.DatabaseName);
-            _collection = _mongoDatabase.GetCollection<Post>("Posts");
+            IMongoClient mongoClient = new MongoClient(settings.ConnectionString);
+            var mongoDatabase = mongoClient.GetDatabase(settings.DatabaseName);
+            _collection = mongoDatabase.GetCollection<Post>("Posts");
         }
         
+        /// <summary>
+        /// This method returns all posts.
+        /// </summary>
+        /// <returns>Post list.</returns>
         public async Task<List<Post>> GetAllPost()
         {
             var allPosts = await _collection.FindAsync(new BsonDocument());
             return allPosts.ToList();
         }
 
+        /// <summary>
+        /// This method gets single post by id.
+        /// </summary>
+        /// <param name="id">PostId.</param>
+        /// <returns>Post.</returns>
         public async Task<Post> GetPostById(string id)
         {
             var filter = Builders<Post>.Filter.Eq("Id", id);
             return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
+        /// <summary>
+        /// This method inserts post.
+        /// </summary>
+        /// <param name="post">Post.</param>
+        /// <returns>boolean response.</returns>
         public async Task<bool> InsertPost(Post post)
         {
             await _collection.InsertOneAsync(post);
             return true;
         }
 
+        /// <summary>
+        /// This method updates post.
+        /// </summary>
+        /// <param name="post">Updated Post</param>
+        /// <returns>boolean response.</returns>
         public async Task<bool> UpdatePost(Post post)
         {
             var filter = Builders<Post>.Filter.Eq("Id", post.Id);
             var updated = await _collection.ReplaceOneAsync(filter, post);
-            if(updated.Equals(null))
-            {
-                return false;
-            }
-            return true;
+            return !updated.Equals(null);
         }
 
+        /// <summary>
+        /// This method deletes post.
+        /// </summary>
+        /// <param name="postId">PostId</param>
+        /// <returns>boolean response.</returns>
         public async Task<bool> DeletePost(string postId)
         {
             var filter = Builders<Post>.Filter.Eq("Id", postId);

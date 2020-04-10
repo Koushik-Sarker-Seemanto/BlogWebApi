@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebService.Routes.v1;
-using Microsoft.AspNetCore.Http;
 
 namespace WebService.Controllers
 {
@@ -28,16 +27,17 @@ namespace WebService.Controllers
             var result = await _userManager.LoginUser(formData);
             var response = result.StatusCode;
 
-            if (response == ContractsService.StatusCode.InvalidArgument)
+            switch (response)
             {
-                return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.InvalidArgument:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.NotFound:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Ok:
+                    return result.Token;
+                default:
+                    return BadRequest("Unknown error");
             }
-            
-            if (response == ContractsService.StatusCode.NotFound)
-            {
-                return BadRequest(result.ErrorMessage);
-            }
-            return result.Token;
         }
 
         [AllowAnonymous]
@@ -47,21 +47,19 @@ namespace WebService.Controllers
             var result = await _userManager.RegisterUser(formData);
             var response = result.StatusCode;
             
-            if (response == ContractsService.StatusCode.AlreadyExists)
+            switch (response)
             {
-                return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.AlreadyExists:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.InvalidArgument:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Internal:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Ok:
+                    return result.Token;
+                default:
+                    return BadRequest("Unknown error");
             }
-
-            if (response == ContractsService.StatusCode.InvalidArgument)
-            {
-                return BadRequest(result.ErrorMessage);
-            }
-
-            if (response == ContractsService.StatusCode.Internal)
-            {
-                return BadRequest(result.ErrorMessage);
-            }
-            return result.Token;
         }
 
         [HttpGet(ApiRoutes.UserRoute.Profile)]
@@ -69,11 +67,15 @@ namespace WebService.Controllers
         {
             var context = HttpContext.User.Identity.Name;
             var user = await _userManager.ReturnProfile(context);
-            if (user.StatusCode == ContractsService.StatusCode.NotFound)
+            switch (user.StatusCode)
             {
-                return BadRequest(user.ErrorMessage);
+                case ContractsService.StatusCode.NotFound:
+                    return BadRequest(user.ErrorMessage);
+                case ContractsService.StatusCode.Ok:
+                    return user;
+                default:
+                    return BadRequest("Unknown error");
             }
-            return user;
         }
         
         [HttpPost(ApiRoutes.UserRoute.UpdateProfile)]
@@ -84,27 +86,21 @@ namespace WebService.Controllers
             
             var response = result.StatusCode;
 
-            if (response == ContractsService.StatusCode.Unauthenticated)
+            switch (response)
             {
-                return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Unauthenticated:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.AlreadyExists:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.InvalidArgument:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Internal:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Ok:
+                    return result;
+                default:
+                    return BadRequest("Unknown error");
             }
-            
-            if (response == ContractsService.StatusCode.AlreadyExists)
-            {
-                return BadRequest(result.ErrorMessage);
-            }
-
-            if (response == ContractsService.StatusCode.InvalidArgument)
-            {
-                return BadRequest(result.ErrorMessage);
-            }
-
-            if (response == ContractsService.StatusCode.Internal)
-            {
-                return BadRequest(result.ErrorMessage);
-            }
-            return result;
         }
-
     }
 }

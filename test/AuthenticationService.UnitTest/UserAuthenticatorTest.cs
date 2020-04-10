@@ -143,6 +143,7 @@ namespace AuthenticationService.UnitTest
             string id = "2";
             var result = await _authenticator.ReturnProfile(id);
             Assert.Equal(StatusCode.NotFound, result.StatusCode);
+            Assert.Equal("User not found", result.ErrorMessage);
         }
 
         [Fact]

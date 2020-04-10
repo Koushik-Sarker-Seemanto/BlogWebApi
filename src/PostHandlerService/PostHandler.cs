@@ -13,14 +13,18 @@ namespace PostHandlerService
 {
     public class PostHandler : IPostHandler
     {
-        private IPostManager _postManager;
-        private IUserManager _userManager;
+        private readonly IPostManager _postManager;
+        private readonly IUserManager _userManager;
         public PostHandler(IPostManager postManager, IUserManager userManager)
         {
             _postManager = postManager;
             _userManager = userManager;
         }
 
+        /// <summary>
+        /// This method returns all posts.
+        /// </summary>
+        /// <returns>GetAllPostResponse</returns>
         public async Task<GetAllPostResponse> GetAllPosts()
         {
             var allPosts = await _postManager.GetAllPost();
@@ -38,6 +42,11 @@ namespace PostHandlerService
             };
         }
 
+        /// <summary>
+        /// This method Gets single post by Id.
+        /// </summary>
+        /// <param name="id">PostId.</param>
+        /// <returns>GetPostByIdResponse.</returns>
         public async Task<GetPostByIdResponse> GetPostById(string id)
         {
             var post = await _postManager.GetPostById(id);
@@ -56,6 +65,12 @@ namespace PostHandlerService
             };
         }
 
+        /// <summary>
+        /// This method inserts post.
+        /// </summary>
+        /// <param name="request">InsertPostRequest.</param>
+        /// <param name="context">CurrentUserId</param>
+        /// <returns>InsertPostResponse.</returns>
         public async Task<InsertPostResponse> InsertPost(InsertPostRequest request, string context)
         {
             var user = await _userManager.GetUser(context);
@@ -97,6 +112,13 @@ namespace PostHandlerService
             };
         }
 
+        /// <summary>
+        /// This method updates post.
+        /// </summary>
+        /// <param name="request">UpdatePostRequest.</param>
+        /// <param name="postId">PostId.</param>
+        /// <param name="context">CurrentUserId.</param>
+        /// <returns>UpdatePostResponse.</returns>
         public async Task<UpdatePostResponse> UpdatePost(UpdatePostRequest request, string postId, string context)
         {
             var user = await _userManager.GetUser(context);
@@ -108,7 +130,6 @@ namespace PostHandlerService
                     StatusCode = StatusCode.InvalidArgument, ErrorMessage = "Empty argument provided",
                 };
             }
-
             var post = await _postManager.GetPostById(postId);
             if (post == null)
             {
@@ -117,7 +138,6 @@ namespace PostHandlerService
                     StatusCode = StatusCode.NotFound, ErrorMessage = "Post not found",
                 };
             }
-
             if (post.Author.Id != user.Id)
             {
                 return new UpdatePostResponse()
@@ -130,7 +150,6 @@ namespace PostHandlerService
                 Id = post.Id, Title = request.Title, Body = request.Body, Author = post.Author,
                 CreatedAt = post.CreatedAt, UpdatedAt = DateTime.Now, Likes = post.Likes,
             };
-            
             var updated = await _postManager.UpdatePost(updatedPost);
             if (!updated)
             {
@@ -146,6 +165,12 @@ namespace PostHandlerService
             };
         }
 
+        /// <summary>
+        /// This method Deletes post.
+        /// </summary>
+        /// <param name="postId">PostId.</param>
+        /// <param name="context">CurrentUserId.</param>
+        /// <returns>DeleteResponse.</returns>
         public async Task<DeletePostResponse> DeletePost(string postId, string context)
         {
             var user = await _userManager.GetUser(context);
@@ -180,8 +205,14 @@ namespace PostHandlerService
                 Post = ConvertToPostResponse(post),
             };
         }
-
-
+        
+        // Private methods for internal calling.
+        
+        /// <summary>
+        /// This method converts Post to PostResponse.
+        /// </summary>
+        /// <param name="post">Post.</param>
+        /// <returns>PostResponse.</returns>
         private PostResponse ConvertToPostResponse(Post post)
         {
             PostResponse postResponse = new PostResponse()
@@ -192,6 +223,11 @@ namespace PostHandlerService
             return postResponse;
         }
         
+        /// <summary>
+        /// This method converts User to UserResponse. 
+        /// </summary>
+        /// <param name="user">User.</param>
+        /// <returns>UserResponse.</returns>
         private UserResponse ConvertToUserResponse(User user)
         {
             if (user == null)
@@ -207,6 +243,12 @@ namespace PostHandlerService
             };
             return userResponse;
         }
+        
+        /// <summary>
+        /// This method converts User list to UserResponse list.
+        /// </summary>
+        /// <param name="userList">UserList.</param>
+        /// <returns>UserResponse list.</returns>
         private List<UserResponse> ConvertToUserResponseList(List<User> userList)
         {
             List<UserResponse> responseList = new List<UserResponse>();
