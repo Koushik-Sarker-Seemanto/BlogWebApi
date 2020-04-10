@@ -28,7 +28,7 @@ namespace WebService.Controllers
         }
 
         [HttpGet(ApiRoutes.PostRoute.GetPost)]
-        public async Task<ActionResult<PostResponse>> GetPostById(string id)
+        public async Task<ActionResult<GetPostByIdResponse>> GetPostById(string id)
         {
             var result = await _postHandler.GetPostById(id);
             if (result.StatusCode == ContractsService.StatusCode.NotFound)
@@ -58,7 +58,7 @@ namespace WebService.Controllers
             }
         }
 
-        [HttpPost(ApiRoutes.PostRoute.UpdatePost)]
+        [HttpPut(ApiRoutes.PostRoute.UpdatePost)]
         public async Task<ActionResult<UpdatePostResponse>> UpdatePost([FromBody] UpdatePostRequest formData, string id)
         {
             var context = HttpContext.User.Identity.Name;
@@ -78,5 +78,6 @@ namespace WebService.Controllers
                     return result;
             }
         }
+        
     }
 }

@@ -69,9 +69,9 @@ namespace WebService.Controllers
         {
             var context = HttpContext.User.Identity.Name;
             var user = await _userManager.ReturnProfile(context);
-            if (user == null)
+            if (user.StatusCode == ContractsService.StatusCode.NotFound)
             {
-                return BadRequest(StatusCodes.Status404NotFound);
+                return BadRequest(user.ErrorMessage);
             }
             return user;
         }

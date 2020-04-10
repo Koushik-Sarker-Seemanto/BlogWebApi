@@ -123,13 +123,20 @@ namespace AuthenticationService
             
             if(user == null)
             {
-                return null;
+                return new ProfileResponse()
+                {
+                    StatusCode = StatusCode.NotFound,
+                    ErrorMessage = "User not found",
+                };
             }
             
             ProfileResponse profileResponse = new ProfileResponse()
             {
-                Name = user.Name,
-                Email = user.Email,
+                StatusCode = StatusCode.Ok,
+                User = new UserResponse()
+                {
+                    Id = user.Id, Name = user.Name, Email = user.Email, CreatedAt = user.CreatedAt,
+                }
             };
             return profileResponse;
         }

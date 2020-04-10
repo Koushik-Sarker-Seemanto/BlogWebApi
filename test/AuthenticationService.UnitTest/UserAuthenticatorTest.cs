@@ -133,8 +133,8 @@ namespace AuthenticationService.UnitTest
         {
             string id = "1";
             var result = await _authenticator.ReturnProfile(id);
-            Assert.Equal("test user",result.Name);
-            Assert.Equal("test", result.Email);
+            Assert.Equal("test user",result.User.Name);
+            Assert.Equal("test", result.User.Email);
         }
         
         [Fact]
@@ -142,7 +142,7 @@ namespace AuthenticationService.UnitTest
         {
             string id = "2";
             var result = await _authenticator.ReturnProfile(id);
-            Assert.Null(result);
+            Assert.Equal(StatusCode.NotFound, result.StatusCode);
         }
 
         [Fact]

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ContractsService;
 using ContractsService.v1.PostContracts.Requests;
 using ContractsService.v1.PostContracts.Response;
+using ContractsService.v1.UserContracts.Responses;
 using ModelsService.Managers.PostManager;
 using ModelsService.Managers.UserManager;
 using ModelsService.Models;
@@ -26,11 +27,7 @@ namespace PostHandlerService
             List<PostResponse> postResponses = new List<PostResponse>();
             foreach (var post in allPosts)
             {
-                PostResponse tempPost = new PostResponse()
-                {
-                    Id = post.Id, Title = post.Title, Body = post.Body, Author = post.Author,
-                    Likes = post.Likes, CreatedAt = post.CreatedAt, UpdatedAt = post.UpdatedAt, StatusCode = StatusCode.Ok,
-                };
+                PostResponse tempPost = ConvertToPostResponse(post);
                 postResponses.Add(tempPost);
             }
             
@@ -41,22 +38,21 @@ namespace PostHandlerService
             };
         }
 
-        public async Task<PostResponse> GetPostById(string id)
+        public async Task<GetPostByIdResponse> GetPostById(string id)
         {
             var post = await _postManager.GetPostById(id);
             if (post == null)
             {
-                return  new PostResponse()
+                return  new GetPostByIdResponse()
                 {
                     StatusCode = StatusCode.NotFound,
                     ErrorMessage = "Post not found",
                 };
             }
-            return new PostResponse()
+            return new GetPostByIdResponse()
             {
                 StatusCode = StatusCode.Ok,
-                Id = post.Id, Title = post.Title, Body = post.Body, Author = post.Author,
-                Likes = post.Likes, CreatedAt = post.CreatedAt, UpdatedAt = post.UpdatedAt,
+                Post = ConvertToPostResponse(post),
             };
         }
 
@@ -96,7 +92,8 @@ namespace PostHandlerService
 
             return new InsertPostResponse()
             {
-                StatusCode = StatusCode.Ok, Title = post.Title, Body = post.Body, Author = post.Author,
+                StatusCode = StatusCode.Ok,
+                Post = ConvertToPostResponse(post),
             };
         }
 
@@ -145,12 +142,57 @@ namespace PostHandlerService
             return new UpdatePostResponse()
             {
                 StatusCode = StatusCode.Ok,
-                Post = new PostResponse()
-                {
-                    Id = updatedPost.Id, Title = updatedPost.Title, Body = updatedPost.Body, Author = updatedPost.Author,
-                    CreatedAt = updatedPost.CreatedAt, UpdatedAt = updatedPost.UpdatedAt, Likes = updatedPost.Likes,
-                }
+                Post = ConvertToPostResponse(updatedPost),
             };
+        }
+
+        
+        
+        private PostResponse ConvertToPostResponse(Post post)
+        {
+            PostResponse postResponse = new PostResponse()
+            {
+                Id = post.Id, Title = post.Title, Body = post.Body, Author = ConvertToUserResponse(post.Author),
+                Likes = ConvertToUserResponseList(post.Likes), CreatedAt = post.CreatedAt, UpdatedAt = post.UpdatedAt,
+            };
+            return postResponse;
+        }
+        
+        private UserResponse ConvertToUserResponse(User user)
+        {
+            if (user == null)
+            {
+                return null;
+            }
+            UserResponse userResponse = new UserResponse()
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                CreatedAt = user.CreatedAt,
+            };
+            return userResponse;
+        }
+        private List<UserResponse> ConvertToUserResponseList(List<User> userList)
+        {
+            List<UserResponse> responseList = new List<UserResponse>();
+            if (userList == null)
+            {
+                return null;
+            }
+            foreach (var user in userList)
+            {
+                UserResponse tempUser = new UserResponse()
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    CreatedAt = user.CreatedAt,
+                };
+                responseList.Add(tempUser);
+            }
+
+            return responseList;
         }
     }
 }
