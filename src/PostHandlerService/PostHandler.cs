@@ -23,11 +23,21 @@ namespace PostHandlerService
         public async Task<GetAllPostResponse> GetAllPosts()
         {
             var allPosts = await _postManager.GetAllPost();
+            List<PostResponse> postResponses = new List<PostResponse>();
+            foreach (var post in allPosts)
+            {
+                PostResponse tempPost = new PostResponse()
+                {
+                    Id = post.Id, Title = post.Title, Body = post.Body, Author = post.Author,
+                    Likes = post.Likes, CreatedAt = post.CreatedAt, UpdatedAt = post.UpdatedAt, StatusCode = StatusCode.Ok,
+                };
+                postResponses.Add(tempPost);
+            }
             
             return new GetAllPostResponse()
             {
                 StatusCode = StatusCode.Ok,
-                PostList = allPosts,
+                PostList = postResponses,
             };
         }
 
@@ -87,6 +97,59 @@ namespace PostHandlerService
             return new InsertPostResponse()
             {
                 StatusCode = StatusCode.Ok, Title = post.Title, Body = post.Body, Author = post.Author,
+            };
+        }
+
+        public async Task<UpdatePostResponse> UpdatePost(UpdatePostRequest request, string postId, string context)
+        {
+            var user = await _userManager.GetUser(context);
+
+            if (!request.IsValid())
+            {
+                return new UpdatePostResponse()
+                {
+                    StatusCode = StatusCode.InvalidArgument, ErrorMessage = "Empty argument provided",
+                };
+            }
+
+            var post = await _postManager.GetPostById(postId);
+            if (post == null)
+            {
+                return new UpdatePostResponse()
+                {
+                    StatusCode = StatusCode.NotFound, ErrorMessage = "Post not found",
+                };
+            }
+
+            if (post.Author.Id != user.Id)
+            {
+                return new UpdatePostResponse()
+                {
+                    StatusCode = StatusCode.PermissionDenied, ErrorMessage = "Unauthorized user to update post",
+                };
+            }
+            Post updatedPost = new Post()
+            {
+                Id = post.Id, Title = request.Title, Body = request.Body, Author = post.Author,
+                CreatedAt = post.CreatedAt, UpdatedAt = DateTime.Now, Likes = post.Likes,
+            };
+            
+            var updated = await _postManager.UpdatePost(updatedPost);
+            if (!updated)
+            {
+                return new UpdatePostResponse()
+                {
+                    StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't update post",
+                };
+            }
+            return new UpdatePostResponse()
+            {
+                StatusCode = StatusCode.Ok,
+                Post = new PostResponse()
+                {
+                    Id = updatedPost.Id, Title = updatedPost.Title, Body = updatedPost.Body, Author = updatedPost.Author,
+                    CreatedAt = updatedPost.CreatedAt, UpdatedAt = updatedPost.UpdatedAt, Likes = updatedPost.Likes,
+                }
             };
         }
     }

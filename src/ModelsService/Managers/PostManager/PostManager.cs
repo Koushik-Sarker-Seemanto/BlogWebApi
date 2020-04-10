@@ -37,13 +37,9 @@ namespace ModelsService.Managers.PostManager
             return true;
         }
 
-        public async Task<bool> UpdatePost(User author, Post post)
+        public async Task<bool> UpdatePost(Post post)
         {
             var filter = Builders<Post>.Filter.Eq("Id", post.Id);
-            if (author != post.Author)
-            {
-                return false;
-            }
             var updated = await _collection.ReplaceOneAsync(filter, post);
             if(updated.Equals(null))
             {

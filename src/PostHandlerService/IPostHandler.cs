@@ -10,5 +10,6 @@ namespace PostHandlerService
         Task<GetAllPostResponse> GetAllPosts();
         Task<PostResponse> GetPostById(string id);
         Task<InsertPostResponse> InsertPost(InsertPostRequest request, string context);
+        Task<UpdatePostResponse> UpdatePost(UpdatePostRequest request, string postId, string context);
     }
 }

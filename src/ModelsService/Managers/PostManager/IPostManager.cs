@@ -12,7 +12,7 @@ namespace ModelsService.Managers.PostManager
         
         Task<bool> InsertPost(Post post);
         
-        Task<bool> UpdatePost(User author, Post post);
+        Task<bool> UpdatePost(Post post);
         
         Task<bool> DeletePost(User author, string postId);
     }

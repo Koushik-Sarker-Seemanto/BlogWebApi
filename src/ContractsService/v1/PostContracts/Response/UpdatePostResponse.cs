@@ -1,12 +1,9 @@
-using System.Collections.Generic;
-using ModelsService.Models;
-
 namespace ContractsService.v1.PostContracts.Response
 {
-    public class GetAllPostResponse: IResponse
+    public class UpdatePostResponse : IResponse
     {
-        public List<PostResponse> PostList { get; set; }
         public StatusCode StatusCode { get; set; }
         public string ErrorMessage { get; set; }
+        public PostResponse Post { get; set; }
     }
 }

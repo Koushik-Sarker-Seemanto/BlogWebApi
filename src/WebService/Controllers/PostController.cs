@@ -57,5 +57,26 @@ namespace WebService.Controllers
                     return result;
             }
         }
+
+        [HttpPost(ApiRoutes.PostRoute.UpdatePost)]
+        public async Task<ActionResult<UpdatePostResponse>> UpdatePost([FromBody] UpdatePostRequest formData, string id)
+        {
+            var context = HttpContext.User.Identity.Name;
+            var result = await _postHandler.UpdatePost(formData, id, context);
+
+            switch (result.StatusCode)
+            {
+                case ContractsService.StatusCode.PermissionDenied:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.NotFound:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.InvalidArgument:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Internal:
+                    return BadRequest(result.ErrorMessage);
+                default:
+                    return result;
+            }
+        }
     }
 }
