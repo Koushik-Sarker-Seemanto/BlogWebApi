@@ -24,11 +24,11 @@ namespace ModelsService.Models
         [BsonRepresentation(BsonType.DateTime)]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         
-        [BsonIgnoreIfNull]
+        [BsonElement]
         public DateTime? UpdatedAt { get; set; }
         // public double Rating { get; set; }
         
-        [BsonIgnoreIfNull]
+        [BsonElement]
         public List<User> Likes { get; set; }
     }
 }

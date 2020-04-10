@@ -111,5 +111,21 @@ namespace WebService.Controllers
                     return BadRequest("Unknown error");
             }
         }
+
+        [HttpGet(ApiRoutes.PostRoute.AddReact)]
+        public async Task<ActionResult<ReactResponse>> AddReact(string id)
+        {
+            var context = HttpContext.User.Identity.Name;
+            var result = await _postHandler.AddReact(context, id);
+            switch (result.StatusCode)
+            {
+                case ContractsService.StatusCode.NotFound:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Ok:
+                    return result;
+                default:
+                    return BadRequest("Unknown error");
+            }
+        }
     }
 }

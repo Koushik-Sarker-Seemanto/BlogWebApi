@@ -15,5 +15,6 @@ namespace ModelsService.Managers.PostManager
         Task<bool> UpdatePost(Post post);
         
         Task<bool> DeletePost(string postId);
+        Task<bool> AddReact(string id, User user);
     }
 }

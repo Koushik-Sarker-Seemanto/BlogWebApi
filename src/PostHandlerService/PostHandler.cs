@@ -93,7 +93,7 @@ namespace PostHandlerService
             
             Post post = new Post()
             {
-                Title = request.Title, Body = request.Body, Author = user, Likes = null, UpdatedAt = null,
+                Title = request.Title, Body = request.Body, Author = user, Likes = new List<User>(), UpdatedAt = null,
             };
 
             var result = await _postManager.InsertPost(post);
@@ -205,7 +205,47 @@ namespace PostHandlerService
                 Post = ConvertToPostResponse(post),
             };
         }
-        
+
+        /// <summary>
+        /// This method gives like if the post is not liked previously.
+        /// gives unlike if the post was liked before.
+        /// </summary>
+        /// <param name="context">CurrentUserId.</param>
+        /// <param name="postId">PostId.</param>
+        /// <returns>ReactResponse.</returns>
+        public async Task<ReactResponse> AddReact(string context, string postId)
+        {
+            var user = await _userManager.GetUser(context);
+            
+            var post = await _postManager.GetPostById(postId);
+            if (post == null)
+            {
+                return new ReactResponse()
+                {
+                    StatusCode = StatusCode.NotFound,
+                    ErrorMessage = "Post not found",
+                };
+            }
+
+            var result = await _postManager.AddReact(post.Id, user);
+            post = await _postManager.GetPostById(postId);
+            if (result)
+            {
+                return new ReactResponse()
+                {
+                    StatusCode = StatusCode.Ok,
+                    LikeOrUnlike = "Like",
+                    Post = ConvertToPostResponse(post),
+                };
+            }
+            return new ReactResponse()
+            {
+                StatusCode = StatusCode.Ok,
+                LikeOrUnlike = "Unlike",
+                Post = ConvertToPostResponse(post),
+            };
+        }
+
         // Private methods for internal calling.
         
         /// <summary>

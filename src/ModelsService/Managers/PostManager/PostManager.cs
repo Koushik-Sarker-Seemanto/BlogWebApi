@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ModelsService.Configuration;
 using ModelsService.Models;
@@ -72,6 +73,31 @@ namespace ModelsService.Managers.PostManager
 
             var record = await _collection.FindOneAndDeleteAsync(filter);
             return !record.Equals(null);
+        }
+
+        /// <summary>
+        /// This method gives like if the post is not liked previously.
+        /// gives unlike if the post was liked before.
+        /// </summary>
+        /// <param name="id">PostId.</param>
+        /// <param name="user">User.</param>
+        /// <returns>boolean response.</returns>
+        public async Task<bool> AddReact(string id, User user)
+        {
+            var filter = Builders<Post>.Filter.Eq("Id", id);
+            var post = await _collection.Find(filter).FirstOrDefaultAsync();
+            
+            var likedUser = post.Likes.FirstOrDefault(e => e.Id == user.Id);
+            if (likedUser == null)
+            {
+                post.Likes.Add(user);
+                await UpdatePost(post);
+                return true;
+            }
+
+            post.Likes.Remove(likedUser);
+            var updated = await UpdatePost(post);
+            return false;
         }
     }
 }

@@ -12,5 +12,6 @@ namespace PostHandlerService
         Task<InsertPostResponse> InsertPost(InsertPostRequest request, string context);
         Task<UpdatePostResponse> UpdatePost(UpdatePostRequest request, string postId, string context);
         Task<DeletePostResponse> DeletePost(string postId, string context);
+        Task<ReactResponse> AddReact(string context, string postId);
     }
 }

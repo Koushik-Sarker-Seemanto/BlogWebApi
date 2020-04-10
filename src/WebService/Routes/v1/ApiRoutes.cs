@@ -17,6 +17,7 @@ namespace WebService.Routes.v1
             public const string InsertPost = "api/v1/posts";
             public const string UpdatePost = "api/v1/posts/{id}";
             public const string DeletePost = "api/v1/posts/{id}";
+            public const string AddReact ="api/v1/post/{id}/react";
         }
     }
 }
