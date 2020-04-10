@@ -48,17 +48,10 @@ namespace ModelsService.Managers.PostManager
             return true;
         }
 
-        public async Task<bool> DeletePost(User author, string postId)
+        public async Task<bool> DeletePost(string postId)
         {
             var filter = Builders<Post>.Filter.Eq("Id", postId);
-            
-            var post = await _collection.Find(filter).FirstOrDefaultAsync();
 
-            if (post.Author != author)
-            {
-                return false;
-            }
-            
             var record = await _collection.FindOneAndDeleteAsync(filter);
             return !record.Equals(null);
         }

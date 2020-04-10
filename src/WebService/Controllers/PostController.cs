@@ -14,7 +14,7 @@ namespace WebService.Controllers
     [Route("[controller]")]
     public class PostController : ControllerBase
     {
-        private IPostHandler _postHandler;
+        private readonly IPostHandler _postHandler;
         public PostController(IPostHandler postHandler)
         {
             _postHandler = postHandler;
@@ -24,18 +24,26 @@ namespace WebService.Controllers
         public async Task<ActionResult<GetAllPostResponse>> GetAllPosts()
         {
             var result = await _postHandler.GetAllPosts();
-            return result;
+            if (result.StatusCode == ContractsService.StatusCode.Ok)
+            {
+                return result;
+            }
+            return BadRequest("Unknown error");
         }
 
         [HttpGet(ApiRoutes.PostRoute.GetPost)]
         public async Task<ActionResult<GetPostByIdResponse>> GetPostById(string id)
         {
             var result = await _postHandler.GetPostById(id);
-            if (result.StatusCode == ContractsService.StatusCode.NotFound)
+            switch (result.StatusCode)
             {
-                return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.NotFound:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Ok:
+                    return result;
+                default:
+                    return BadRequest("Unknown error");
             }
-            return result;
         }
 
         [HttpPost(ApiRoutes.PostRoute.InsertPost)]
@@ -53,8 +61,10 @@ namespace WebService.Controllers
                     return BadRequest(result.ErrorMessage);
                 case ContractsService.StatusCode.InvalidArgument:
                     return BadRequest(result.ErrorMessage);
-                default:
+                case ContractsService.StatusCode.Ok:
                     return result;
+                default:
+                    return BadRequest("Unknown error");
             }
         }
 
@@ -74,10 +84,32 @@ namespace WebService.Controllers
                     return BadRequest(result.ErrorMessage);
                 case ContractsService.StatusCode.Internal:
                     return BadRequest(result.ErrorMessage);
-                default:
+                case ContractsService.StatusCode.Ok:
                     return result;
+                default:
+                    return BadRequest("Unknown error");
             }
         }
-        
+
+        [HttpDelete(ApiRoutes.PostRoute.DeletePost)]
+        public async Task<ActionResult<DeletePostResponse>> DeletePost(string id)
+        {
+            var context = HttpContext.User.Identity.Name;
+            var result = await _postHandler.DeletePost(id, context);
+
+            switch (result.StatusCode)
+            {
+                case ContractsService.StatusCode.NotFound:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.PermissionDenied:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Internal:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Ok:
+                    return result;
+                default:
+                    return BadRequest("Unknown error");
+            }
+        }
     }
 }

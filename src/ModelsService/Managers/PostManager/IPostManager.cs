@@ -14,6 +14,6 @@ namespace ModelsService.Managers.PostManager
         
         Task<bool> UpdatePost(Post post);
         
-        Task<bool> DeletePost(User author, string postId);
+        Task<bool> DeletePost(string postId);
     }
 }

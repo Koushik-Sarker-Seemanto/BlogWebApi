@@ -146,8 +146,42 @@ namespace PostHandlerService
             };
         }
 
-        
-        
+        public async Task<DeletePostResponse> DeletePost(string postId, string context)
+        {
+            var user = await _userManager.GetUser(context);
+            var post = await _postManager.GetPostById(postId);
+            if (post == null)
+            {
+                return new DeletePostResponse()
+                {
+                    StatusCode = StatusCode.NotFound, ErrorMessage = "Post not found",
+                };
+            }
+
+            if (user.Id != post.Author.Id)
+            {
+                return new DeletePostResponse()
+                {
+                    StatusCode = StatusCode.PermissionDenied, ErrorMessage = "Unauthorized user to delete post",
+                };
+            }
+
+            var deleted = await _postManager.DeletePost(post.Id);
+            if (!deleted)
+            {
+                return new DeletePostResponse()
+                {
+                    StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't delete post",
+                };
+            }
+            return new DeletePostResponse()
+            {
+                StatusCode = StatusCode.Ok,
+                Post = ConvertToPostResponse(post),
+            };
+        }
+
+
         private PostResponse ConvertToPostResponse(Post post)
         {
             PostResponse postResponse = new PostResponse()
@@ -191,7 +225,7 @@ namespace PostHandlerService
                 };
                 responseList.Add(tempUser);
             }
-
+            
             return responseList;
         }
     }
