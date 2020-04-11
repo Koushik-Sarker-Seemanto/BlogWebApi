@@ -38,6 +38,8 @@ namespace WebService
         {
             services.AddControllers();
 
+            services.AddCors();
+
             services.AddSingleton<IUserAuthenticator, UserAuthenticator>();
             services.AddSingleton<IPostHandler, PostHandler>();
             
@@ -102,6 +104,13 @@ namespace WebService
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseCors(builder =>
+                        {
+                            builder
+                            .AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                        });
             
             app.UseHttpsRedirection();
             

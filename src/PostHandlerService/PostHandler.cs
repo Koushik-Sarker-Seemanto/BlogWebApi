@@ -26,13 +26,26 @@ namespace PostHandlerService
         /// This method returns all posts.
         /// </summary>
         /// <returns>GetAllPostResponse</returns>
-        public async Task<GetAllPostResponse> GetAllPosts()
+        public async Task<GetAllPostResponse> GetAllPosts(string context)
         {
             var allPosts = await _postManager.GetAllPost();
             List<PostResponse> postResponses = new List<PostResponse>();
+            User user = null;
+            if(context != "none")
+            {
+                user = await _userManager.GetUser(context);
+            }
             foreach (var post in allPosts)
             {
                 PostResponse tempPost = ConvertToPostResponse(post);
+                if(user != null)
+                {
+                    var temp = await ReactByUser(user.Id, post.Id);
+                    if(temp.LikeOrUnlike == "Liked")
+                    {
+                        tempPost.Liked = true;
+                    }
+                }
                 postResponses.Add(tempPost);
             }
             

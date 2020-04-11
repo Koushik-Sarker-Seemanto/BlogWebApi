@@ -20,10 +20,16 @@ namespace WebService.Controllers
             _postHandler = postHandler;
         }
 
+        [AllowAnonymous]
         [HttpGet(ApiRoutes.PostRoute.GetPostList)]
         public async Task<ActionResult<GetAllPostResponse>> GetAllPosts()
         {
-            var result = await _postHandler.GetAllPosts();
+            var context = HttpContext.User.Identity.Name;
+            if(context  == null)
+            {
+                context = "none";
+            }
+            var result = await _postHandler.GetAllPosts(context);
             if (result.StatusCode == ContractsService.StatusCode.Ok)
             {
                 return result;
@@ -31,6 +37,7 @@ namespace WebService.Controllers
             return BadRequest("Unknown error");
         }
 
+        [AllowAnonymous]
         [HttpGet(ApiRoutes.PostRoute.GetPost)]
         public async Task<ActionResult<GetPostByIdResponse>> GetPostById(string id)
         {

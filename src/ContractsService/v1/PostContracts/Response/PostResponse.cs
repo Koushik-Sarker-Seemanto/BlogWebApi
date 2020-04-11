@@ -14,5 +14,6 @@ namespace ContractsService.v1.PostContracts.Response
         public List<UserResponse> Likes { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public bool Liked { get; set; }
     }
 }
