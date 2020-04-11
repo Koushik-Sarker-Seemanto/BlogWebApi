@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ContractsService;
 using ContractsService.v1.PostContracts.Requests;
@@ -228,6 +229,7 @@ namespace PostHandlerService
             }
 
             var result = await _postManager.AddReact(post.Id, user);
+            
             post = await _postManager.GetPostById(postId);
             if (result)
             {
@@ -243,6 +245,37 @@ namespace PostHandlerService
                 StatusCode = StatusCode.Ok,
                 LikeOrUnlike = "Unlike",
                 Post = ConvertToPostResponse(post),
+            };
+        }
+
+        public async Task<ReactResponse> ReactByUser(string context, string postId)
+        {
+            var user = await _userManager.GetUser(context);
+            var post = await _postManager.GetPostById(postId);
+            if (post == null)
+            {
+                return new ReactResponse()
+                {
+                    StatusCode = StatusCode.NotFound,
+                    ErrorMessage = "Post not found",
+                };
+            }
+
+            var found = post.Likes.FirstOrDefault(e => e.Id == user.Id);
+            if (found == null)
+            {
+                return new ReactResponse()
+                {
+                    StatusCode = StatusCode.Ok,
+                    Post = ConvertToPostResponse(post),
+                    LikeOrUnlike = "NotLiked",
+                };
+            }
+            return new ReactResponse()
+            {
+                StatusCode = StatusCode.Ok,
+                Post = ConvertToPostResponse(post),
+                LikeOrUnlike = "Liked",
             };
         }
 

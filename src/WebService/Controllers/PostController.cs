@@ -112,7 +112,7 @@ namespace WebService.Controllers
             }
         }
 
-        [HttpGet(ApiRoutes.PostRoute.AddReact)]
+        [HttpPost(ApiRoutes.PostRoute.AddReact)]
         public async Task<ActionResult<ReactResponse>> AddReact(string id)
         {
             var context = HttpContext.User.Identity.Name;
@@ -123,6 +123,24 @@ namespace WebService.Controllers
                     return BadRequest(result.ErrorMessage);
                 case ContractsService.StatusCode.Ok:
                     return result;
+                default:
+                    return BadRequest("Unknown error");
+            }
+        }
+
+        [HttpGet(ApiRoutes.PostRoute.ReactByUser)]
+        public async Task<ActionResult<bool>> ReactByUser(string id)
+        {
+            var context = HttpContext.User.Identity.Name;
+            var result = await _postHandler.ReactByUser(context, id);
+            switch (result.StatusCode)
+            {
+                case ContractsService.StatusCode.NotFound:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Ok when result.LikeOrUnlike == "Liked":
+                    return true;
+                case ContractsService.StatusCode.Ok:
+                    return false;
                 default:
                     return BadRequest("Unknown error");
             }
