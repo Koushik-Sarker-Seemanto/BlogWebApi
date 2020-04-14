@@ -5,8 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CacheProcessorService\CacheProcessorService.csproj" />
-      <ProjectReference Include="..\ContractsService\ContractsService.csproj" />
+      <PackageReference Include="StackExchange.Redis" Version="2.1.30" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\ModelsService\ModelsService.csproj" />
     </ItemGroup>
 

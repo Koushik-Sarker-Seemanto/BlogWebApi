@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CacheProcessorService;
 using ContractsService;
 using ContractsService.v1.PostContracts.Requests;
 using ContractsService.v1.PostContracts.Response;
@@ -16,10 +17,12 @@ namespace PostHandlerService
     {
         private readonly IPostManager _postManager;
         private readonly IUserManager _userManager;
-        public PostHandler(IPostManager postManager, IUserManager userManager)
+        private readonly ICacheProcessor _cacheProcessor;
+        public PostHandler(IPostManager postManager, IUserManager userManager, ICacheProcessor cacheProcessor)
         {
             _postManager = postManager;
             _userManager = userManager;
+            _cacheProcessor = cacheProcessor;
         }
 
         /// <summary>
@@ -63,6 +66,16 @@ namespace PostHandlerService
         /// <returns>GetPostByIdResponse.</returns>
         public async Task<GetPostByIdResponse> GetPostById(string id)
         {
+            var cachedPost = await _cacheProcessor.FindPostAsync(id);
+            if (cachedPost != null)
+            {
+                return new GetPostByIdResponse()
+                {
+                    StatusCode = StatusCode.Ok,
+                    ErrorMessage = "Served From Cache",
+                    Post = ConvertToPostResponse(cachedPost),
+                };
+            }
             var post = await _postManager.GetPostById(id);
             if (post == null)
             {
@@ -72,6 +85,7 @@ namespace PostHandlerService
                     ErrorMessage = "Post not found",
                 };
             }
+            var cached = await _cacheProcessor.UpdatePostAsync(post.Id, post, DateTime.Now);
             return new GetPostByIdResponse()
             {
                 StatusCode = StatusCode.Ok,
@@ -109,8 +123,16 @@ namespace PostHandlerService
             {
                 Title = request.Title, Body = request.Body, Author = user, Likes = new List<User>(), UpdatedAt = null,
             };
-
+            
             var result = await _postManager.InsertPost(post);
+            var cached = await _cacheProcessor.UpdatePostAsync(post.Id, post, DateTime.Now);
+            if (cached == false)
+            {
+                return new InsertPostResponse()
+                {
+                    StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't Cache post"
+                };
+            }
             if (result == false)
             {
                 return new InsertPostResponse()
@@ -164,6 +186,14 @@ namespace PostHandlerService
                 Id = post.Id, Title = request.Title, Body = request.Body, Author = post.Author,
                 CreatedAt = post.CreatedAt, UpdatedAt = DateTime.Now, Likes = post.Likes,
             };
+            var cached = await _cacheProcessor.UpdatePostAsync(post.Id, post, DateTime.Now);
+            if (cached == false)
+            {
+                return new UpdatePostResponse()
+                {
+                    StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't Cache post"
+                };
+            }
             var updated = await _postManager.UpdatePost(updatedPost);
             if (!updated)
             {

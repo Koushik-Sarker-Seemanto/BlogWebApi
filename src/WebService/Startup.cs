@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AuthenticationService;
+using CacheProcessorService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,6 +22,7 @@ using ModelsService.Managers.PostManager;
 using ModelsService.Managers.UserManager;
 using PostHandlerService;
 using WebService.Configuration;
+using StackExchange.Redis;
 
 namespace WebService
 {
@@ -45,13 +47,18 @@ namespace WebService
             
             services.AddSingleton<IUserManager,UserManager>();
             services.AddSingleton<IPostManager, PostManager>();
+
+            services.AddSingleton<ICacheProcessor, PostCacheProcessor>();
             
             services.Configure<DatabaseSettings>(
                 Configuration.GetSection(nameof(DatabaseSettings)));
             
             services.AddSingleton<IDatabaseSettings>(sp => 
                 sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
-            
+            var connectionMultiplexer = ConnectionMultiplexer.Connect(Configuration.GetConnectionString("LocalRedis"));
+            services.AddTransient<IDatabase>((sp) =>
+                connectionMultiplexer.GetDatabase(Configuration.GetValue<int>("DbNumber")));
+
             // Add Swagger
             services.AddSwaggerGen(e => 
             {
