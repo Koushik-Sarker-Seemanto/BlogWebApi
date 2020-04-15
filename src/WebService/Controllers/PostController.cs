@@ -37,6 +37,22 @@ namespace WebService.Controllers
             return BadRequest("Unknown error");
         }
 
+        [HttpGet(ApiRoutes.PostRoute.UserPost)]
+        public async Task<ActionResult<GetAllPostResponse>> UsersAllPost()
+        {
+            var context = HttpContext.User.Identity.Name;
+            var result = await _postHandler.UserAllPosts(context);
+            if (result.StatusCode == ContractsService.StatusCode.NotFound)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+            else if (result.StatusCode == ContractsService.StatusCode.Ok)
+            {
+                return result;
+            }
+            return BadRequest("Unknown error");
+        }
+
         [AllowAnonymous]
         [HttpGet(ApiRoutes.PostRoute.GetPost)]
         public async Task<ActionResult<GetPostByIdResponse>> GetPostById(string id)
@@ -128,6 +144,8 @@ namespace WebService.Controllers
             {
                 case ContractsService.StatusCode.NotFound:
                     return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Internal:
+                    return BadRequest(result.ErrorMessage);
                 case ContractsService.StatusCode.Ok:
                     return result;
                 default:
@@ -143,6 +161,8 @@ namespace WebService.Controllers
             switch (result.StatusCode)
             {
                 case ContractsService.StatusCode.NotFound:
+                    return BadRequest(result.ErrorMessage);
+                case ContractsService.StatusCode.Internal:
                     return BadRequest(result.ErrorMessage);
                 case ContractsService.StatusCode.Ok when result.LikeOrUnlike == "Liked":
                     return true;

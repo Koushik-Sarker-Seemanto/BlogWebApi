@@ -28,6 +28,12 @@ namespace ModelsService.Managers.PostManager
             return allPosts.ToList();
         }
 
+        public async Task<List<Post>> GetAllPost(string userId)
+        {
+            var allPosts = await _collection.FindAsync(e => e.Author.Id == userId);
+            return allPosts.ToList();
+        }
+
         /// <summary>
         /// This method gets single post by id.
         /// </summary>

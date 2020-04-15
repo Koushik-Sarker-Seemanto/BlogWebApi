@@ -18,7 +18,10 @@ namespace PostHandlerService
         private readonly IPostManager _postManager;
         private readonly IUserManager _userManager;
         private readonly ICacheProcessor _cacheProcessor;
-        public PostHandler(IPostManager postManager, IUserManager userManager, ICacheProcessor cacheProcessor)
+        public PostHandler(
+            IPostManager postManager, 
+            IUserManager userManager, 
+            ICacheProcessor cacheProcessor)
         {
             _postManager = postManager;
             _userManager = userManager;
@@ -52,11 +55,45 @@ namespace PostHandlerService
                 postResponses.Add(tempPost);
             }
             
-            return new GetAllPostResponse()
+            return new GetAllPostResponse() { StatusCode = StatusCode.Ok, PostList = postResponses, };
+        }
+
+        public async Task<GetAllPostResponse> UserAllPosts(string context)
+        {
+            var cacheChecker = true;
+            var allPosts = await _cacheProcessor.FindUserPostStringAsync(context);
+            if (allPosts == null)
             {
-                StatusCode = StatusCode.Ok,
-                PostList = postResponses,
-            };
+                cacheChecker = false;
+                allPosts = await _postManager.GetAllPost(context);
+                if (allPosts == null)
+                {
+                    return new GetAllPostResponse() { StatusCode = StatusCode.NotFound, ErrorMessage = "No post found", };
+                }
+
+                if (allPosts.Count > 0)
+                {
+                    var cached = await _cacheProcessor.UpdateUserPostStringAsync(context, allPosts);
+                    if (!cached)
+                    {
+                        return new GetAllPostResponse() { StatusCode = StatusCode.Internal, ErrorMessage = "Internal error! Couldn't cache post", };
+                    }
+                }
+            }
+            
+            List<PostResponse> postResponses = new List<PostResponse>();
+            foreach (var post in allPosts)
+            {
+                PostResponse tempPost = ConvertToPostResponse(post);
+                var temp = await ReactByUser(context, post.Id);
+                if(temp.LikeOrUnlike == "Liked")
+                {
+                    tempPost.Liked = true;
+                }
+                postResponses.Add(tempPost);
+            }
+
+            return cacheChecker ? new GetAllPostResponse() { StatusCode = StatusCode.Ok, PostList = postResponses, ErrorMessage = "Served from Cache", } : new GetAllPostResponse() { StatusCode = StatusCode.Ok, PostList = postResponses, };
         }
 
         /// <summary>
@@ -66,31 +103,22 @@ namespace PostHandlerService
         /// <returns>GetPostByIdResponse.</returns>
         public async Task<GetPostByIdResponse> GetPostById(string id)
         {
-            var cachedPost = await _cacheProcessor.FindPostAsync(id);
+            var cachedPost = await _cacheProcessor.FindPostStringAsync(id);
             if (cachedPost != null)
             {
-                return new GetPostByIdResponse()
-                {
-                    StatusCode = StatusCode.Ok,
-                    ErrorMessage = "Served From Cache",
-                    Post = ConvertToPostResponse(cachedPost),
-                };
+                return new GetPostByIdResponse() { StatusCode = StatusCode.Ok, ErrorMessage = "Served From Cache", Post = ConvertToPostResponse(cachedPost), };
             }
             var post = await _postManager.GetPostById(id);
             if (post == null)
             {
-                return  new GetPostByIdResponse()
-                {
-                    StatusCode = StatusCode.NotFound,
-                    ErrorMessage = "Post not found",
-                };
+                return  new GetPostByIdResponse() { StatusCode = StatusCode.NotFound, ErrorMessage = "Post not found", };
             }
-            var cached = await _cacheProcessor.UpdatePostAsync(post.Id, post, DateTime.Now);
-            return new GetPostByIdResponse()
+            var cached = await _cacheProcessor.UpdatePostStringAsync(post.Id, post);
+            if (!cached)
             {
-                StatusCode = StatusCode.Ok,
-                Post = ConvertToPostResponse(post),
-            };
+                return new GetPostByIdResponse(){ StatusCode = StatusCode.Internal, ErrorMessage = "Internal error! Couldn't cache post", };
+            }
+            return new GetPostByIdResponse() { StatusCode = StatusCode.Ok, Post = ConvertToPostResponse(post), };
         }
 
         /// <summary>
@@ -125,12 +153,21 @@ namespace PostHandlerService
             };
             
             var result = await _postManager.InsertPost(post);
-            var cached = await _cacheProcessor.UpdatePostAsync(post.Id, post, DateTime.Now);
+            var cached = await _cacheProcessor.UpdatePostStringAsync(post.Id, post);
             if (cached == false)
             {
                 return new InsertPostResponse()
                 {
                     StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't Cache post"
+                };
+            }
+
+            cached = await _cacheProcessor.InsertUserPostStringAsync(user.Id, post);
+            if (cached == false)
+            {
+                return new InsertPostResponse()
+                {
+                    StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't Cache post(UserPosts)",
                 };
             }
             if (result == false)
@@ -186,12 +223,20 @@ namespace PostHandlerService
                 Id = post.Id, Title = request.Title, Body = request.Body, Author = post.Author,
                 CreatedAt = post.CreatedAt, UpdatedAt = DateTime.Now, Likes = post.Likes,
             };
-            var cached = await _cacheProcessor.UpdatePostAsync(post.Id, post, DateTime.Now);
+            var cached = await _cacheProcessor.UpdatePostStringAsync(updatedPost.Id, updatedPost);
             if (cached == false)
             {
                 return new UpdatePostResponse()
                 {
                     StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't Cache post"
+                };
+            }
+            cached = await _cacheProcessor.UpdateUserPostStringAsync(user.Id, updatedPost);
+            if (cached == false)
+            {
+                return new UpdatePostResponse()
+                {
+                    StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't Cache post(UserPosts)",
                 };
             }
             var updated = await _postManager.UpdatePost(updatedPost);
@@ -234,6 +279,22 @@ namespace PostHandlerService
                     StatusCode = StatusCode.PermissionDenied, ErrorMessage = "Unauthorized user to delete post",
                 };
             }
+            var cached = await _cacheProcessor.DeletePostStringAsync(post.Id);
+            if (cached == false)
+            {
+                return new DeletePostResponse()
+                {
+                    StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't Cache post"
+                };
+            }
+            cached = await _cacheProcessor.DeleteUserPostStringAsync(user.Id, post);
+            if (cached == false)
+            {
+                return new DeletePostResponse()
+                {
+                    StatusCode = StatusCode.Internal, ErrorMessage = "Internal Error! Couldn't Cache post(Delete post)",
+                };
+            }
 
             var deleted = await _postManager.DeletePost(post.Id);
             if (!deleted)
@@ -260,20 +321,38 @@ namespace PostHandlerService
         public async Task<ReactResponse> AddReact(string context, string postId)
         {
             var user = await _userManager.GetUser(context);
-            
-            var post = await _postManager.GetPostById(postId);
+            var post = await _cacheProcessor.FindPostStringAsync(postId);
             if (post == null)
             {
-                return new ReactResponse()
+                post = await _postManager.GetPostById(postId);
+                if (post == null)
                 {
-                    StatusCode = StatusCode.NotFound,
-                    ErrorMessage = "Post not found",
-                };
+                    return new ReactResponse()
+                    {
+                        StatusCode = StatusCode.NotFound,
+                        ErrorMessage = "Post not found",
+                    };
+                }
+                await _cacheProcessor.UpdatePostStringAsync(post.Id, post);
             }
 
             var result = await _postManager.AddReact(post.Id, user);
-            
-            post = await _postManager.GetPostById(postId);
+
+            post = await _postManager.GetPostById(post.Id);
+            var cached = true;
+            if (post.Author.Id == user.Id)
+            {
+                cached = await _cacheProcessor.UpdateUserPostStringAsync(user.Id, post);
+            }
+            var cachedSingle = await _cacheProcessor.UpdatePostStringAsync(post.Id, post);
+            if (!cached || !cachedSingle)
+            {
+                return new ReactResponse()
+                {
+                    StatusCode = StatusCode.Internal,
+                    ErrorMessage = "Internal error! Couldn't cache react",
+                };
+            }
             if (result)
             {
                 return new ReactResponse()
@@ -294,14 +373,28 @@ namespace PostHandlerService
         public async Task<ReactResponse> ReactByUser(string context, string postId)
         {
             var user = await _userManager.GetUser(context);
-            var post = await _postManager.GetPostById(postId);
+            var post = await _cacheProcessor.FindPostStringAsync(postId);
             if (post == null)
             {
-                return new ReactResponse()
+                post = await _postManager.GetPostById(postId);
+                if (post == null)
                 {
-                    StatusCode = StatusCode.NotFound,
-                    ErrorMessage = "Post not found",
-                };
+                    return new ReactResponse()
+                    {
+                        StatusCode = StatusCode.NotFound,
+                        ErrorMessage = "Post not found",
+                    };
+                }
+                var cachedSingle = await _cacheProcessor.UpdatePostStringAsync(post.Id, post);
+                var cached = await _cacheProcessor.UpdateUserPostStringAsync(user.Id, post);
+                if (!cached || !cachedSingle)
+                {
+                    return new ReactResponse()
+                    {
+                        StatusCode = StatusCode.Internal,
+                        ErrorMessage = "Internal error! Couldn't cache react",
+                    };
+                }
             }
 
             var found = post.Likes.FirstOrDefault(e => e.Id == user.Id);

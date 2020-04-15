@@ -7,6 +7,7 @@ namespace ModelsService.Managers.PostManager
     public interface IPostManager
     {
         Task<List<Post>> GetAllPost();
+        Task<List<Post>> GetAllPost(string userId);
         
         Task<Post> GetPostById(string id);
         
