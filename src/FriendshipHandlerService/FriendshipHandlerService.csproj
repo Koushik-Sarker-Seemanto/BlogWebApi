@@ -5,11 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ModelsService\ModelsService.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="v1\FriendshipContracts\Requests" />
+      <ProjectReference Include="..\ContractsService\ContractsService.csproj" />
     </ItemGroup>
 
 </Project>

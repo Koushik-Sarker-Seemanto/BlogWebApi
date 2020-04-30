@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AuthenticationService;
 using CacheProcessorService;
+using FriendshipHandlerService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -47,6 +48,8 @@ namespace WebService
             
             services.AddSingleton<IUserManager,UserManager>();
             services.AddSingleton<IPostManager, PostManager>();
+
+            services.AddSingleton<IFriendshipHandler, FriendshipHandler>();
 
             services.AddSingleton<ICacheProcessor, PostCacheProcessor>();
             

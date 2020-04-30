@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ContractsService;
 using ContractsService.v1.UserContracts.Requests;
@@ -92,7 +93,8 @@ namespace AuthenticationService
 
             var newUser = new User
             {
-                Email = request.Email, Name = request.Name
+                Email = request.Email, Name = request.Name, Friends = new List<string>(), 
+                FriendRequests = new List<string>(), FriendRequestsSent = new List<string>(),
             };
             newUser.SetPassword(request.Password);
             var added = await _userManager.InsertUser(newUser);
@@ -177,6 +179,9 @@ namespace AuthenticationService
                 Id = currentUser.Id,
                 Name = request.Name,
                 Email = request.Email,
+                Friends = currentUser.Friends,
+                FriendRequests = currentUser.FriendRequests,
+                FriendRequestsSent = currentUser.FriendRequestsSent,
             };
             user.SetPassword(request.Password);
 

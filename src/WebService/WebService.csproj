@@ -13,6 +13,7 @@
     <ItemGroup>
       <ProjectReference Include="..\AuthenticationService\AuthenticationService.csproj" />
       <ProjectReference Include="..\ContractsService\ContractsService.csproj" />
+      <ProjectReference Include="..\FriendshipHandlerService\FriendshipHandlerService.csproj" />
       <ProjectReference Include="..\PostHandlerService\PostHandlerService.csproj" />
     </ItemGroup>
 

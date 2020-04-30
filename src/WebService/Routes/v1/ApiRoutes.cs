@@ -4,7 +4,7 @@ namespace WebService.Routes.v1
     {
         public static class UserRoute
         {
-            public const string GetUser = "api/v1/users/";
+            public const string GetUsers = "api/v1/users/";
             public const string Login = "api/v1/user/login";
             public const string Registration = "api/v1/user/registration";
             public const string Profile = "api/v1/user/profile";
@@ -20,6 +20,15 @@ namespace WebService.Routes.v1
             public const string AddReact ="api/v1/post/{id}/react";
             public const string ReactByUser = "api/v1/post/{id}/react";
             public const string UserPost = "api/v1/user/posts";
+        }
+
+        public static class FriendshipRoute
+        {
+            public const string AddFriend = "api/v1/friend/addfriend/{id}";
+            public const string FriendList = "api/v1/friends";
+            public const string FriendRequestList = "api/v1/friend/friendrequests";
+            public const string AcceptRequest = "ap1/v1/friend/accept/{id}";
+            public const string RejectRequest = "api/v1/friend/reject/{id}";
         }
     }
 }
